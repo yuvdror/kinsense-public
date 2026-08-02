@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TribeSentry</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f5f6f8; --card:#fff; --fg:#111; --muted:#6b7280;
+          --line:#e5e7eb; --brand:#4f6ef7; --err:#dc2626; --ok:#059669; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#171a21; --fg:#f3f4f6; --muted:#9aa1ac; --line:#262b34; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100dvh; display:grid; place-items:center; padding:24px;
+         background:var(--bg); color:var(--fg);
+         font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  .card { width:100%; max-width:400px; background:var(--card); border:1px solid var(--line);
+          border-radius:18px; padding:28px 24px; box-shadow:0 12px 32px rgba(0,0,0,.08); }
+  .logo { width:52px; height:52px; border-radius:15px; margin:0 auto 16px;
+          background:linear-gradient(135deg,#4f6ef7,#8b5cf6); display:grid; place-items:center;
+          color:#fff; font-weight:800; font-size:22px; }
+  h1 { font-size:20px; margin:0 0 6px; text-align:center; }
+  p.sub { margin:0 0 20px; text-align:center; color:var(--muted); font-size:14px; }
+  label { display:block; font-size:13px; font-weight:600; margin:14px 0 6px; }
+  input { width:100%; padding:12px 14px; font-size:16px; border-radius:11px;
+          border:1px solid var(--line); background:transparent; color:var(--fg); }
+  input:focus { outline:2px solid var(--brand); outline-offset:1px; }
+  button { width:100%; margin-top:18px; padding:13px; font-size:16px; font-weight:700;
+           color:#fff; background:var(--brand); border:0; border-radius:11px; cursor:pointer; }
+  button[disabled] { opacity:.55; cursor:default; }
+  .msg { margin-top:14px; font-size:14px; text-align:center; }
+  .err { color:var(--err); } .ok { color:var(--ok); }
+  .hint { margin-top:18px; font-size:13px; color:var(--muted); text-align:center; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="logo">TS</div>
+
+    <section id="reset" hidden>
+      <h1>Choose a new password</h1>
+      <p class="sub">for <span id="who">your account</span></p>
+      <form id="form">
+        <label for="pw">New password</label>
+        <input id="pw" type="password" autocomplete="new-password" minlength="8" required>
+        <label for="pw2">Confirm password</label>
+        <input id="pw2" type="password" autocomplete="new-password" minlength="8" required>
+        <button id="go" type="submit">Update password</button>
+      </form>
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <section id="done" hidden>
+      <h1>Password updated</h1>
+      <p class="sub">Open TribeSentry and sign in with your new password.</p>
+    </section>
+
+    <section id="confirmed" hidden>
+      <h1>Email confirmed</h1>
+      <p class="sub">Your account is ready. Open TribeSentry and sign in.</p>
+    </section>
+
+    <section id="bad" hidden>
+      <h1>This link has expired</h1>
+      <p class="sub" id="badmsg">Password reset links can only be used once, and expire after a while.</p>
+      <p class="hint">Request a new one from the app's sign-in screen.</p>
+    </section>
+  </main>
+
+<script>
+  const CFG = { url: "https://yindkqtxilizeqjfuclg.supabase.co", key: "sb_publishable_cJcK5rsTOw8UlL5krsLBTw_J4x0jNdE" };
+  const $ = (id) => document.getElementById(id);
+  const show = (id) => { for (const s of ["reset","done","confirmed","bad"]) $(s).hidden = s !== id; };
+
+  // Tokens ride in the fragment so they never reach a server. Some GoTrue versions
+  // put errors here too, rather than failing the redirect.
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const query = new URLSearchParams(location.search);
+  const accessToken = hash.get("access_token");
+  const type = hash.get("type") || query.get("type");
+  const errDesc = hash.get("error_description") || query.get("error_description");
+
+  if (errDesc) {
+    show("bad"); $("badmsg").textContent = decodeURIComponent(errDesc.replace(/\+/g, " "));
+  } else if (type === "recovery" && accessToken) {
+    show("reset");
+    // The JWT's payload is base64url and carries the address — shown so the user
+    // knows which account they're changing. Display only; nothing trusts it.
+    try {
+      const claims = JSON.parse(atob(accessToken.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+      if (claims.email) $("who").textContent = claims.email;
+    } catch (_) { /* cosmetic only */ }
+  } else if (accessToken || type === "signup" || type === "email") {
+    show("confirmed");
+  } else {
+    show("bad");
+    $("badmsg").textContent = "This link is missing its token. Open the most recent email, and use the link only once.";
+  }
+
+  $("form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pw = $("pw").value, pw2 = $("pw2").value;
+    const msg = $("msg");
+    msg.className = "msg";
+    if (pw !== pw2) { msg.classList.add("err"); msg.textContent = "Those passwords don't match."; return; }
+    if (pw.length < 8) { msg.classList.add("err"); msg.textContent = "Use at least 8 characters."; return; }
+
+    $("go").disabled = true; msg.textContent = "Updating…";
+    try {
+      const res = await fetch(CFG.url + "/auth/v1/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": CFG.key,
+          "Authorization": "Bearer " + accessToken,
+        },
+        body: JSON.stringify({ password: pw }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.msg || body.message || ("Request failed (" + res.status + ")"));
+      }
+      history.replaceState(null, "", location.pathname);   // drop the token from the URL
+      show("done");
+    } catch (err) {
+      msg.classList.add("err");
+      msg.textContent = err.message || "Something went wrong. Request a fresh link and try again.";
+      $("go").disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

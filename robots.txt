@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# The password-reset landing page. Nothing to index, and it should never surface
+# in a search result where someone might mistake it for a sign-in page.
+Disallow: /auth-callback.html
+
+Sitemap: https://tribesentry.cloud/sitemap.xml

@@ -1,0 +1,5 @@
+# The generator is source, not site. Nothing in here is secret — it is marketing copy
+# and two scripts — but it has no business being fetchable at /build/content.py, and
+# excluding it keeps the deployed tree equal to what actually gets served.
+build/
+README.md
