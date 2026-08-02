@@ -32,14 +32,18 @@ def e(text: str) -> str:
     return html.escape(text, quote=False)
 
 
+# No trailing slash on locale paths. vercel.json sets trailingSlash: false, so the
+# host 308-redirects /ar/ to /ar — and a canonical or hreflang pointing at a redirect
+# is a canonical pointing at the wrong URL. Emit the address that actually returns
+# 200. Verified against a real deployment, not assumed.
 def url_for(code: str) -> str:
-    return f"{SITE}/" if code == "" else f"{SITE}/{code}/"
+    return f"{SITE}/" if code == "" else f"{SITE}/{code}"
 
 
 def rel(target: str) -> str:
     """Link to the page for `target`. Root-relative throughout, so the same string
     is valid from the root page and from a locale subdirectory alike."""
-    return "/" if target == "" else f"/{target}/"
+    return "/" if target == "" else f"/{target}"
 
 
 def asset(name: str) -> str:

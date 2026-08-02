@@ -64,11 +64,14 @@ def resolve(href: str, rw: dict[str, str]) -> pathlib.Path | None:
         return None
     path = href.split("#")[0].split("?")[0]
     path = rw.get(path, path)
-    if path.endswith("/"):
-        path += "index.html"
-    elif path == "":
+    if path == "":
         return None
-    return ROOT / path.lstrip("/")
+    target = ROOT / path.lstrip("/").rstrip("/")
+    # A bare directory path (/ar) is served as its index.html, the same way the host
+    # resolves it. "/" lands here too and resolves to the root index.
+    if target.is_dir():
+        target = target / "index.html"
+    return target
 
 
 def main() -> int:
