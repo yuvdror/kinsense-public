@@ -14,7 +14,7 @@
 # `pt-BR` is `pt`, `zh-CN` is `zh-Hans`).
 
 SITE = "https://tribesentry.cloud"
-CONTACT = "yuvdror@gmail.com"
+CONTACT = "info@tribesentry.cloud"
 
 LOCALES = [
     {

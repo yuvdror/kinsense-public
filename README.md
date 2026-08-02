@@ -118,7 +118,7 @@ rather than a `*.vercel.app` one.
 
 The canonical text lives in the private app repo at `PRIVACY.md`. `privacy.html` here is
 the rendered public version — update it there, then regenerate this page. Filled-in
-values: developer **smart-apps**, contact **yuvdror@gmail.com**, effective
+values: developer **smart-apps**, contact **info@tribesentry.cloud**, effective
 **July 26, 2026**, location-history retention **7 days**, minimum age **13**.
 
 The 7-day pruning the policy promises **is** enforced, by the nightly `pg_cron` job in
