@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from content import CONTACT, LOCALES, SITE  # noqa: E402
+from content import CONTACT, DELETION, LOCALES, SITE  # noqa: E402
 
 ROOT = pathlib.Path(__file__).parent.parent
 
@@ -215,12 +215,96 @@ def render(loc: dict) -> str:
   <div class="wrap">
     <div class="links">
       <a href="{privacy_href}">{e(loc["footer_privacy"])}</a>
+      <a href="{deletion_path(code)}">{e(DELETION[code]["h1"])}</a>
       <a href="mailto:{CONTACT}">{e(loc["footer_contact"])}</a>
     </div>
     <div>&copy; TribeSentry — smart-apps</div>
     <p class="disclaimer">{e(loc["disclaimer"])}</p>
   </div>
 </footer>
+
+</body>
+</html>
+'''
+
+
+def deletion_path(code: str) -> str:
+    """Site-absolute path. Not rel(code) + "delete-account" — rel returns "/de" with
+    no trailing slash, so concatenating gives "/dedelete-account"."""
+    return "/delete-account" if code == "" else f"/{code}/delete-account"
+
+
+def deletion_url(code: str) -> str:
+    return f"{SITE}{deletion_path(code)}"
+
+
+def render_deletion(loc: dict) -> str:
+    """The account-deletion page Play requires at a public URL.
+
+    Deliberately plain: no hero, no pricing, no call to action. Someone reaching this
+    page wants to leave, and a marketing pitch in the way is both obnoxious and the
+    kind of thing a policy reviewer flags as an obstruction.
+    """
+    code = loc["code"]
+    d = DELETION[code]
+
+    steps = "\n".join(f"        <li>{e(s)}</li>" for s in d["steps"])
+    removed = "\n".join(f"        <li>{e(r)}</li>" for r in d["removed"])
+    email = e(d["email"]).replace(
+        "{contact}", f'<a href="mailto:{CONTACT}">{CONTACT}</a>'
+    )
+
+    alts = "\n".join(
+        f'<link rel="alternate" hreflang="{o["hreflang"]}" href="{deletion_url(o["code"])}">'
+        for o in LOCALES
+    )
+
+    return f'''<!doctype html>
+<html lang="{loc["lang"]}" dir="{loc["dir"]}">
+<head>
+{BANNER}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{e(d["title"])}</title>
+<meta name="description" content="{html.escape(d["desc"])}">
+{alts}
+<link rel="alternate" hreflang="x-default" href="{deletion_url("")}">
+<link rel="canonical" href="{deletion_url(code)}">
+<link rel="stylesheet" href="{asset("style.css")}">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="{rel(code)}">Tribe<span>Sentry</span></a>
+  </div>
+</header>
+
+<div class="wrap doc">
+  <h1>{e(d["h1"])}</h1>
+  <p class="lede-sm">{e(d["intro"])}</p>
+
+  <h2>{e(d["steps_h2"])}</h2>
+  <ol>
+{steps}
+  </ol>
+
+  <h2>{e(d["removed_h2"])}</h2>
+  <ul>
+{removed}
+  </ul>
+
+  <h2>{e(d["kept_h2"])}</h2>
+  <p>{e(d["kept"])}</p>
+
+  <h2>{e(d["email_h2"])}</h2>
+  <p>{email}</p>
+
+  <h2>{e(d["retention_h2"])}</h2>
+  <p>{e(d["retention"])}</p>
+
+  <p class="doc-back"><a href="{rel(code)}">&larr; {e(d["back"])}</a></p>
+</div>
 
 </body>
 </html>
@@ -244,6 +328,8 @@ def sitemap() -> str:
   </url>'''
         )
     entries.append(f'  <url>\n    <loc>{SITE}/privacy</loc>\n  </url>')
+    for loc in LOCALES:
+        entries.append(f'  <url>\n    <loc>{deletion_url(loc["code"])}</loc>\n  </url>')
     body = "\n".join(entries)
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -272,6 +358,13 @@ def main() -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(render(loc), encoding="utf-8")
         written.append(out.relative_to(ROOT))
+
+        # Written as <code>/delete-account.html and routed to the extensionless
+        # /delete-account by vercel.json, matching how /privacy is served.
+        name = "delete-account.html"
+        doc = ROOT / name if loc["code"] == "" else ROOT / loc["code"] / name
+        doc.write_text(render_deletion(loc), encoding="utf-8")
+        written.append(doc.relative_to(ROOT))
 
     (ROOT / "sitemap.xml").write_text(sitemap(), encoding="utf-8")
     (ROOT / "robots.txt").write_text(robots(), encoding="utf-8")

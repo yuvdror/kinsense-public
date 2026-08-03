@@ -169,4 +169,37 @@
   <url>
     <loc>https://tribesentry.cloud/privacy</loc>
   </url>
+  <url>
+    <loc>https://tribesentry.cloud/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/de/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/es/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/fr/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/pt/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/ru/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/hi/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/ar/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/he/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/ja/delete-account</loc>
+  </url>
+  <url>
+    <loc>https://tribesentry.cloud/zh/delete-account</loc>
+  </url>
 </urlset>

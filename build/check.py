@@ -57,13 +57,42 @@ def rewrites() -> dict[str, str]:
     return {r["source"]: r["destination"] for r in cfg.get("rewrites", [])}
 
 
+def apply_rewrites(path: str, rw: dict[str, str]) -> str:
+    """Resolve a path through vercel.json's rewrites, including `:param` segments.
+
+    Vercel matches `/:lang/delete-account` against any single first segment and
+    substitutes it into the destination. Treating rewrite sources as literals would
+    report every localised /de/delete-account link as a 404 that isn't one.
+    """
+    if path in rw:
+        return rw[path]
+    for source, destination in rw.items():
+        if ":" not in source:
+            continue
+        src_parts, path_parts = source.strip("/").split("/"), path.strip("/").split("/")
+        if len(src_parts) != len(path_parts):
+            continue
+        captured: dict[str, str] = {}
+        for sp, pp in zip(src_parts, path_parts):
+            if sp.startswith(":"):
+                captured[sp[1:]] = pp
+            elif sp != pp:
+                break
+        else:
+            out = destination
+            for name, value in captured.items():
+                out = out.replace(f":{name}", value)
+            return out
+    return path
+
+
 def resolve(href: str, rw: dict[str, str]) -> pathlib.Path | None:
     """Map a site-absolute href to the file a static host would serve, or None if
     the link is external / not a file reference."""
     if href.startswith(("http://", "https://", "mailto:", "#")):
         return None
     path = href.split("#")[0].split("?")[0]
-    path = rw.get(path, path)
+    path = apply_rewrites(path, rw)
     if path == "":
         return None
     target = ROOT / path.lstrip("/").rstrip("/")
@@ -77,7 +106,9 @@ def resolve(href: str, rw: dict[str, str]) -> pathlib.Path | None:
 def main() -> int:
     errors: list[str] = []
     rw = rewrites()
-    pages = sorted(ROOT.glob("*.html")) + sorted(ROOT.glob("*/index.html"))
+    # Every page at the root and one level down (the locale directories). Globbing
+    # only */index.html silently skipped the localised delete-account pages.
+    pages = sorted(ROOT.glob("*.html")) + sorted(ROOT.glob("*/*.html"))
     pages = [p for p in pages if "build" not in p.parts]
 
     docs: dict[pathlib.Path, Doc] = {}
@@ -130,15 +161,24 @@ def main() -> int:
             root = ET.fromstring(sm.read_text(encoding="utf-8"))
             ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
             locs = [el.text for el in root.findall(".//s:loc", ns)]
+            listed: set[pathlib.Path] = set()
             for loc in locs:
                 target = resolve(re.sub(r"^https?://[^/]+", "", loc), rw)
-                if target is not None and not target.exists():
+                if target is None:
+                    continue
+                if not target.exists():
                     errors.append(f"sitemap.xml: {loc} does not exist")
-            if len(locs) != len(generated) + 1:  # locales + /privacy
-                errors.append(
-                    f"sitemap.xml lists {len(locs)} URLs but there are "
-                    f"{len(generated)} locale pages (+1 for /privacy)"
-                )
+                else:
+                    listed.add(target)
+
+            # Every page that should be indexed must be in the sitemap. Structural
+            # rather than a count, so adding a page type can't silently pass.
+            indexable = {
+                p for p in pages
+                if p.name != "auth-callback.html"  # Disallowed in robots.txt
+            }
+            for missing in sorted(indexable - listed):
+                errors.append(f"sitemap.xml is missing {missing.relative_to(ROOT)}")
         except ET.ParseError as exc:
             errors.append(f"sitemap.xml is not valid XML: {exc}")
 
