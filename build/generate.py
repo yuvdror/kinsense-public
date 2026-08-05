@@ -328,6 +328,10 @@ def sitemap() -> str:
   </url>'''
         )
     entries.append(f'  <url>\n    <loc>{SITE}/privacy</loc>\n  </url>')
+    # English only, like /privacy: Apple and Play each want one reachable support
+    # URL, and support copy nobody has reviewed in ten languages would be worse than
+    # none at all. Add locales here if that ever changes.
+    entries.append(f'  <url>\n    <loc>{SITE}/support</loc>\n  </url>')
     for loc in LOCALES:
         entries.append(f'  <url>\n    <loc>{deletion_url(loc["code"])}</loc>\n  </url>')
     body = "\n".join(entries)
