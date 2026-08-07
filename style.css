@@ -107,10 +107,6 @@ section > .wrap > p.sub { color: var(--muted); margin: 0 0 1.75rem; max-width: 5
 
 /* Pricing ----------------------------------------------------------------- */
 .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
-/* One tier (free, ad-supported) would otherwise stretch the full row and read as a
-   banner rather than a plan. Scoped to the single-child case so bringing a paid tier
-   back restores the side-by-side grid on its own. */
-.plans:has(> .plan:only-child) { max-width: 24rem; }
 .plan { border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; background: var(--card); }
 .plan.featured { border-color: var(--accent); }
 .plan h3 { margin: 0 0 .2rem; font-size: 1.1rem; }
