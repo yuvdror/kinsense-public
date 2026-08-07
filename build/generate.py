@@ -133,7 +133,6 @@ def render(loc: dict) -> str:
     )
 
     free_items = "\n".join(f"          <li>{e(i)}</li>" for i in loc["free_items"])
-    plus_items = "\n".join(f"          <li>{e(i)}</li>" for i in loc["plus_items"])
 
     return f'''<!doctype html>
 <html lang="{loc["lang"]}" dir="{loc["dir"]}">
@@ -212,20 +211,12 @@ def render(loc: dict) -> str:
     <h2>{e(loc["pricing_h2"])}</h2>
     <p class="sub">{e(loc["pricing_sub"])}</p>
     <div class="plans">
-      <div class="plan">
+      <div class="plan featured">
         <h3>{e(loc["free_name"])}</h3>
         <div class="price">{e(loc["free_price"])}</div>
         <ul>
 {free_items}
         </ul>
-      </div>
-      <div class="plan featured">
-        <h3>{e(loc["plus_name"])}</h3>
-        <div class="price">{e(loc["plus_price"])}</div>
-        <ul>
-{plus_items}
-        </ul>
-        <p class="plan-note">{e(loc["plus_note"])}</p>
       </div>
     </div>
   </div>
