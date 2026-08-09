@@ -46,6 +46,36 @@ FAVICONS = '\n'.join([
 ])
 
 
+# The three pillars are the same three concepts, in the same order, in every
+# locale — offline, crash detection, privacy — so the icon is positional and the
+# emoji in content.py is ignored. Line-art SVG rather than emoji: emoji render as
+# a different picture on every platform (and as full-colour cartoons on Apple),
+# which is the single most casual-looking thing on an otherwise restrained page.
+# currentColor so they inherit the accent, and aria-hidden because the heading
+# beside each one already says what it is.
+PILLAR_ICONS = [
+    # offline map — a folded map with a signal slash
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5Z"/><path d="M9 4v13"/>'
+    '<path d="M15 6.5v13"/></svg>',
+    # crash detection — a car. An earlier version added an "impact burst" above it
+    # and the extra strokes turned the whole thing into an unreadable blob at
+    # 24px; rendered side by side, the plain car was the only one that still read
+    # as a car. Complexity is the enemy at this size.
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M4 16h16"/><path d="M5.6 16v-3l1.9-4A1.9 1.9 0 0 1 9.2 8h5.6a1.9 1.9 0 0 1 '
+    '1.7 1l1.9 4v3"/><circle cx="8.6" cy="16" r="1.6"/><circle cx="15.4" cy="16" r="1.6"/>'
+    '</svg>',
+    # privacy — a shield, echoing the app icon
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    '<path d="M12 21s7-3.2 7-9V5.6L12 3 5 5.6V12c0 5.8 7 9 7 9Z"/>'
+    '<path d="m9 11.8 2.1 2.1L15 10"/></svg>',
+]
+
+
 def e(text: str) -> str:
     """Escape for HTML text content."""
     return html.escape(text, quote=False)
@@ -110,10 +140,10 @@ def render(loc: dict) -> str:
 
     pillars = "\n".join(
         f'''    <div class="pillar">
-      <span class="icon" aria-hidden="true">{icon}</span>
+      <span class="icon" aria-hidden="true">{PILLAR_ICONS[i]}</span>
       <h3>{e(title)}</h3>
       <p>{e(body)}</p>
-    </div>''' for icon, title, body in loc["pillars"]
+    </div>''' for i, (_emoji, title, body) in enumerate(loc["pillars"])
     )
 
     features = "\n".join(
@@ -178,20 +208,15 @@ def render(loc: dict) -> str:
     <p class="note">{e(loc["note"])}</p>
   </div>
 
-  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
-       path entirely, and the poster is the brand frame rather than a mid-clip
-       still. Native controls so it behaves correctly on iOS, where inline
-       playback and the fullscreen affordance are the platform's job, not ours. -->
-  <figure class="hero-video reveal">
-    <video
-      controls
-      playsinline
-      preload="none"
-      poster="{asset("poster.jpg")}"
-      aria-label="{e(loc["video_label"])}">
-      <source src="{asset("tribesentry.mp4")}" type="video/mp4">
-    </video>
-  </figure>
+  <!-- Real App Store screenshots in CSS-drawn device frames. Shipped at 2x of
+       their display width as WebP (~40 KB each, against 1.6 MB for the source
+       PNGs), and the two flanking phones are aria-hidden because all three show
+       the same product — one accessible name is enough. -->
+  <div class="showcase reveal" role="img" aria-label="{e(loc["shots_label"])}">
+    <figure class="phone phone-side"><img src="{asset("shots/trail.webp")}" width="520" height="1130" alt="" aria-hidden="true" loading="lazy" decoding="async"></figure>
+    <figure class="phone phone-lead"><img src="{asset("shots/live-map.webp")}" width="520" height="1130" alt="" loading="eager" decoding="async" fetchpriority="high"></figure>
+    <figure class="phone phone-side"><img src="{asset("shots/territories.webp")}" width="520" height="1130" alt="" aria-hidden="true" loading="lazy" decoding="async"></figure>
+  </div>
 
   <div class="pillars reveal">
 {pillars}

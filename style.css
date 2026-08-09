@@ -155,167 +155,174 @@ footer.site .links { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom
 
 
 /* ==========================================================================
-   Presentation layer — added on top of the original structural styles.
-   Everything here is decorative: the page reads and works identically with it
-   stripped out, which is deliberate. Every motion rule is switched off under
-   prefers-reduced-motion at the bottom of this file.
+   Presentation layer.
+
+   Restrained on purpose: one accent used sparingly, a lot of whitespace, and
+   the product itself doing the visual work. Everything here is decoration —
+   the page reads identically with it stripped — and every motion rule has a
+   prefers-reduced-motion counterpart at the bottom.
    ========================================================================== */
 
-/* The brand ramp on the wordmark, so the header carries the icon's colours. */
+/* Rhythm ------------------------------------------------------------------
+   A single spacing step, so sections breathe consistently instead of each
+   picking its own padding. */
+:root { --step: clamp(3.5rem, 8vw, 6.5rem); }
+.wrap { max-width: 64rem; }
+
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+/* Header ------------------------------------------------------------------ */
+header.site {
+  position: sticky; top: 0; z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.5) blur(12px);
+  -webkit-backdrop-filter: saturate(1.5) blur(12px);
+}
 .logo span {
   background: var(--brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
-/* Hero glow ---------------------------------------------------------------
-   Two soft radial washes behind the fold. Painted on a ::before pinned to the
-   viewport width rather than a background on .hero, so it isn't clipped by the
-   wrap's max-width and doesn't add a scrollbar. */
-.hero { position: relative; isolation: isolate; }
-/* Explicit layering: the glow is painted at z-index 0 and the content sits above
-   it, rather than relying on a negative z-index staying above the canvas
-   background — which is correct per spec but easy to break later. */
+/* Hero --------------------------------------------------------------------
+   The glow is explicitly layered (isolate + z-index 0/1) rather than sitting at
+   z-index:-1, which only works because a body background propagates to the
+   canvas — true per spec, and quietly broken by anyone who later gives <html> a
+   background. */
+.hero { padding: var(--step) 0 2.5rem; position: relative; isolation: isolate; }
 .hero > * { position: relative; z-index: 1; }
 .hero::before {
-  content: "";
-  position: absolute;
-  inset-block-start: -8rem;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
-  height: 34rem;
-  pointer-events: none;
-  z-index: 0;
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  inset-block-start: -6rem; inset-inline-start: 50%; transform: translateX(-50%);
+  width: 100vw; height: 32rem;
   background:
-    radial-gradient(48rem 22rem at 50% 0%, var(--glow), transparent 70%),
-    radial-gradient(28rem 16rem at 78% 22%, rgba(42, 230, 185, .12), transparent 70%);
+    radial-gradient(46rem 20rem at 50% 0%, var(--glow), transparent 72%),
+    radial-gradient(24rem 14rem at 76% 26%, rgba(42,230,185,.10), transparent 72%);
 }
+.hero h1 { font-size: clamp(2.1rem, 5.6vw, 3.5rem); max-width: 18ch; }
+.hero p.lede { font-size: clamp(1.05rem, 2.2vw, 1.22rem); max-width: 44ch; }
 
-.hero h1 { animation: rise .7s cubic-bezier(.2, .7, .3, 1) both; }
-.hero p.lede { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .08s both; }
-.hero .cta { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .16s both; }
-.hero .note { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .24s both; }
-
-@keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
+.hero h1, .hero p.lede, .hero .cta, .hero .note {
+  animation: rise .7s cubic-bezier(.2,.7,.3,1) both;
 }
+.hero p.lede { animation-delay: .07s; }
+.hero .cta   { animation-delay: .14s; }
+.hero .note  { animation-delay: .21s; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 /* Buttons ----------------------------------------------------------------- */
 .btn {
+  border-radius: 10px; padding: .85rem 1.6rem;
   transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
-  will-change: transform;
 }
-.btn-primary {
-  background: var(--brand);
-  border: 0;
-  box-shadow: 0 6px 18px var(--glow);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px var(--glow); }
-.btn-secondary:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-primary { background: var(--brand); border: 0; box-shadow: 0 6px 20px var(--glow); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px var(--glow); }
+.btn-secondary:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--brand-2); }
 .btn:active { transform: translateY(0); }
 
-/* Hero video --------------------------------------------------------------
-   A gradient hairline done as a padded wrapper, because border-image can't do
-   rounded corners. The inner radius is 1px tighter so the ramp reads as a rim
-   rather than a stripe. */
-.hero-video {
-  margin: 2.75rem auto 0;
-  max-width: 46rem;
-  padding: 1px;
-  border-radius: 17px;
-  background: var(--brand);
+/* Device showcase ---------------------------------------------------------
+   Three CSS-drawn phones. The flanking two are pushed back and down so the lead
+   screen reads first; on narrow screens they'd be unreadable at that scale, so
+   they're dropped rather than shrunk. */
+.showcase {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(.75rem, 3vw, 2rem);
+  padding: 1rem 0 var(--step);
+  perspective: 1600px;
+}
+.phone {
+  margin: 0; flex: 0 0 auto;
+  border-radius: 2rem; padding: .42rem;
+  background: linear-gradient(160deg, #3a3f47, #16181c 60%);
   box-shadow: var(--shadow-lg);
-  transition: transform .25s ease, box-shadow .25s ease;
+  transition: transform .45s cubic-bezier(.2,.7,.3,1), box-shadow .45s ease;
 }
-.hero-video:hover { transform: translateY(-3px); }
-.hero-video video {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 16px;
-  background: #000;
+.phone img { display: block; width: 100%; height: auto; border-radius: 1.6rem; }
+.phone-lead { width: clamp(13rem, 25vw, 16.5rem); z-index: 2; }
+.phone-side {
+  width: clamp(10rem, 19vw, 13rem);
+  opacity: .82; transform: translateY(1.75rem) scale(.97);
 }
+.showcase:hover .phone-lead { transform: translateY(-6px); }
+.showcase:hover .phone-side { opacity: .95; }
+@media (max-width: 46rem) { .phone-side { display: none; } .phone-lead { width: min(17rem, 68vw); } }
 
-/* Cards ------------------------------------------------------------------- */
-.pillar, .plan, .privacy-callout {
+/* Pillars & cards --------------------------------------------------------- */
+.pillars { padding-block: 0 var(--step); gap: 1.15rem; }
+.pillar, .plan {
+  border-radius: 14px;
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 .pillar:hover, .plan:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
+  transform: translateY(-3px); box-shadow: var(--shadow);
   border-color: color-mix(in srgb, var(--brand-2) 40%, var(--border));
 }
+/* SVG pillar icons, sized in one place and inheriting the accent via
+   currentColor. The tile keeps them from floating unanchored above the heading. */
 .pillar .icon {
-  font-size: 1.7rem;
-  transition: transform .25s cubic-bezier(.2, .7, .3, 1);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.5rem; height: 2.5rem; margin-bottom: .85rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--brand-2) 12%, transparent);
+  color: var(--brand-2);
+  transition: transform .25s cubic-bezier(.2,.7,.3,1), background-color .25s ease;
 }
-.pillar:hover .icon { transform: scale(1.12) rotate(-4deg); }
-
-.plan.featured { box-shadow: 0 0 0 1px var(--brand-2), var(--shadow); }
-.plan.featured .price {
-  background: var(--brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.pillar .icon svg { width: 1.35rem; height: 1.35rem; }
+.pillar:hover .icon {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--brand-2) 18%, transparent);
 }
 
-/* Section headings get a short gradient rule, which is enough to structure the
-   page without another border line. */
-section h2 { position: relative; padding-block-end: .55rem; }
+/* Sections ---------------------------------------------------------------- */
+section { padding: var(--step) 0; }
+section h2 { position: relative; padding-block-end: .6rem; }
 section h2::after {
-  content: "";
-  position: absolute;
-  inset-block-end: 0;
-  inset-inline-start: 0;
-  width: 2.5rem;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--brand);
+  content: ""; position: absolute; inset-block-end: 0; inset-inline-start: 0;
+  width: 2.5rem; height: 3px; border-radius: 2px; background: var(--brand);
 }
-
-.privacy-callout { position: relative; overflow: hidden; border-inline-start-color: transparent; }
-.privacy-callout::before {
-  content: "";
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 3px;
-  background: var(--brand);
-}
-.privacy-callout:hover { box-shadow: var(--shadow); }
-
+.features { gap: 2rem; }
 .feature h4 { transition: color .18s ease; }
 .feature:hover h4 { color: var(--brand-2); }
 
+/* Pricing ----------------------------------------------------------------- */
+.plan.featured { box-shadow: 0 0 0 1px var(--brand-2), var(--shadow); }
+.plan.featured .price {
+  background: var(--brand);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Privacy callout ---------------------------------------------------------
+   The accent edge is a positioned bar rather than border-image, which paints
+   all four edges and would fight the 1px border already there. */
+.privacy-callout {
+  position: relative; overflow: hidden;
+  border-inline-start-color: transparent;
+  transition: box-shadow .2s ease;
+}
+.privacy-callout::before {
+  content: ""; position: absolute; inset-block: 0; inset-inline-start: 0;
+  width: 3px; background: var(--brand);
+}
+.privacy-callout:hover { box-shadow: var(--shadow); }
+
 /* Scroll reveal -----------------------------------------------------------
-   .reveal is inert until the inline observer in the page adds .in-view, so a
-   no-JS visitor sees the content immediately rather than a blank column. The
-   observer adds .js-reveal to <html> first; without it these rules never apply. */
+   Inert until the inline script adds .js-reveal to <html>, so JS off — or a
+   script that never runs — leaves everything visible rather than blank. */
 .js-reveal .reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .6s cubic-bezier(.2, .7, .3, 1), transform .6s cubic-bezier(.2, .7, .3, 1);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.2,.7,.3,1), transform .6s cubic-bezier(.2,.7,.3,1);
 }
 .js-reveal .reveal.in-view { opacity: 1; transform: none; }
 
-/* Focus visibility. The gradient buttons drop the default outline contrast, so
-   put it back explicitly rather than relying on the UA default. */
-a:focus-visible, .btn:focus-visible, summary:focus-visible, video:focus-visible {
-  outline: 2px solid var(--brand-2);
-  outline-offset: 3px;
-  border-radius: 6px;
+/* The gradient button drops the UA outline's contrast, so state it. */
+a:focus-visible, .btn:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--brand-2); outline-offset: 3px; border-radius: 6px;
 }
 
-/* Motion is decoration. Someone who has asked the OS for less of it gets the
-   same page, static — including the hero entrance, which would otherwise be the
-   first thing they see move. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero h1, .hero p.lede, .hero .cta, .hero .note { animation: none; }
   .js-reveal .reveal { opacity: 1; transform: none; transition: none; }
-  .btn, .pillar, .plan, .hero-video, .pillar .icon { transition: none; }
-  .btn:hover, .pillar:hover, .plan:hover, .hero-video:hover { transform: none; }
+  .btn, .pillar, .plan, .phone, .pillar .icon { transition: none; }
+  .btn:hover, .pillar:hover, .plan:hover { transform: none; }
+  .showcase:hover .phone-lead { transform: none; }
 }
