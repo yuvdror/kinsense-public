@@ -70,7 +70,22 @@
     <p class="note">Android 和 iPhone · 11 种语言 · 求救与碰撞检测免费</p>
   </div>
 
-  <div class="pillars">
+  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
+       path entirely, and the poster is the brand frame rather than a mid-clip
+       still. Native controls so it behaves correctly on iOS, where inline
+       playback and the fullscreen affordance are the platform's job, not ours. -->
+  <figure class="hero-video reveal">
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="/poster.jpg"
+      aria-label="一分钟了解 TribeSentry">
+      <source src="/tribesentry.mp4" type="video/mp4">
+    </video>
+  </figure>
+
+  <div class="pillars reveal">
     <div class="pillar">
       <span class="icon" aria-hidden="true">🗺️</span>
       <h3>离线可用</h3>
@@ -89,7 +104,7 @@
   </div>
 </div>
 
-<section id="features">
+<section id="features" class="reveal">
   <div class="wrap">
     <h2>包含哪些功能</h2>
     <p class="sub">家人定位应有的一切，再加上只有真正走出信号范围之后才会在意的那些。</p>
@@ -130,7 +145,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section id="privacy" class="reveal">
   <div class="wrap">
     <h2>你的位置不是商品</h2>
     <p class="sub">只有清楚数据去了哪里，位置共享才立得住。所以这里就写清楚它去了哪里。</p>
@@ -147,7 +162,7 @@
   </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="reveal">
   <div class="wrap">
     <h2>价格</h2>
     <p class="sub">免费的恰恰是安全相关的功能。我们对历史记录的时长收费，因为真正产生存储成本的是它。</p>
@@ -189,6 +204,31 @@
     <p class="disclaimer">碰撞检测是基于手机传感器的推断。它可能漏掉真实的碰撞，也可能误报，并不能替代紧急救援服务。在后台持续使用 GPS 可能会缩短电池续航时间。</p>
   </div>
 </footer>
+
+<!-- Scroll reveal. The stylesheet only hides .reveal under .js-reveal on <html>,
+     which this script adds — so with JS off, or if this fails, everything is
+     visible rather than a blank column. Elements unobserve once shown; they
+     never animate back out. Skipped entirely when the OS asks for less motion,
+     so nothing is hidden and then revealed for someone who won't see the
+     transition. Inline because the CSP allows 'unsafe-inline' for scripts but
+     the site ships no JS bundle. -->
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  document.documentElement.classList.add('js-reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
 
 </body>
 </html>

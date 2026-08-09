@@ -70,7 +70,22 @@
     <p class="note">Android and iPhone · 11 languages · SOS and crash detection are free</p>
   </div>
 
-  <div class="pillars">
+  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
+       path entirely, and the poster is the brand frame rather than a mid-clip
+       still. Native controls so it behaves correctly on iOS, where inline
+       playback and the fullscreen affordance are the platform's job, not ours. -->
+  <figure class="hero-video reveal">
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="/poster.jpg"
+      aria-label="TribeSentry in one minute">
+      <source src="/tribesentry.mp4" type="video/mp4">
+    </video>
+  </figure>
+
+  <div class="pillars reveal">
     <div class="pillar">
       <span class="icon" aria-hidden="true">🗺️</span>
       <h3>Works offline</h3>
@@ -89,7 +104,7 @@
   </div>
 </div>
 
-<section id="features">
+<section id="features" class="reveal">
   <div class="wrap">
     <h2>What's in it</h2>
     <p class="sub">Everything you'd expect from a family locator, plus the things that only matter once you're actually out of range.</p>
@@ -130,7 +145,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section id="privacy" class="reveal">
   <div class="wrap">
     <h2>Your location isn't the product</h2>
     <p class="sub">Location sharing only works if you trust where the data goes. So here is exactly where it goes.</p>
@@ -147,7 +162,7 @@
   </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="reveal">
   <div class="wrap">
     <h2>Pricing</h2>
     <p class="sub">The safety features are the free ones. We charge for history depth, because that's what actually costs us money to store.</p>
@@ -189,6 +204,31 @@
     <p class="disclaimer">Crash detection is a heuristic based on your phone's sensors. It can miss a real crash and it can raise a false one, and it is not a substitute for emergency services. Continued use of GPS running in the background can decrease battery life.</p>
   </div>
 </footer>
+
+<!-- Scroll reveal. The stylesheet only hides .reveal under .js-reveal on <html>,
+     which this script adds — so with JS off, or if this fails, everything is
+     visible rather than a blank column. Elements unobserve once shown; they
+     never animate back out. Skipped entirely when the OS asks for less motion,
+     so nothing is hidden and then revealed for someone who won't see the
+     transition. Inline because the CSP allows 'unsafe-inline' for scripts but
+     the site ships no JS bundle. -->
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  document.documentElement.classList.add('js-reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
 
 </body>
 </html>

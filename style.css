@@ -12,6 +12,14 @@
   --border: #e4e7eb;
   --card: #f7f8fa;
   --maxw: 60rem;
+  /* Sampled off the app icon, so the site and the launcher agree. */
+  --brand-1: #2ae6b9;
+  --brand-2: #209fdd;
+  --brand-3: #235feb;
+  --brand: linear-gradient(135deg, var(--brand-1), var(--brand-2) 45%, var(--brand-3));
+  --glow: rgba(32, 159, 221, .18);
+  --shadow: 0 10px 30px rgba(16, 24, 40, .10), 0 2px 8px rgba(16, 24, 40, .06);
+  --shadow-lg: 0 24px 60px rgba(16, 24, 40, .16), 0 4px 12px rgba(16, 24, 40, .08);
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -22,6 +30,9 @@
     --accent-fg: #10131a;
     --border: #2a2e35;
     --card: #1e2127;
+    --glow: rgba(32, 159, 221, .22);
+    --shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 2px 8px rgba(0, 0, 0, .3);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, .55), 0 4px 12px rgba(0, 0, 0, .35);
   }
 }
 
@@ -141,3 +152,170 @@ footer.site .links { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom
 .doc li { margin: .35rem 0; }
 .doc .lede-sm { color: var(--muted); font-size: 1.02rem; }
 .doc-back { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+
+
+/* ==========================================================================
+   Presentation layer — added on top of the original structural styles.
+   Everything here is decorative: the page reads and works identically with it
+   stripped out, which is deliberate. Every motion rule is switched off under
+   prefers-reduced-motion at the bottom of this file.
+   ========================================================================== */
+
+/* The brand ramp on the wordmark, so the header carries the icon's colours. */
+.logo span {
+  background: var(--brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Hero glow ---------------------------------------------------------------
+   Two soft radial washes behind the fold. Painted on a ::before pinned to the
+   viewport width rather than a background on .hero, so it isn't clipped by the
+   wrap's max-width and doesn't add a scrollbar. */
+.hero { position: relative; isolation: isolate; }
+/* Explicit layering: the glow is painted at z-index 0 and the content sits above
+   it, rather than relying on a negative z-index staying above the canvas
+   background — which is correct per spec but easy to break later. */
+.hero > * { position: relative; z-index: 1; }
+.hero::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -8rem;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 34rem;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(48rem 22rem at 50% 0%, var(--glow), transparent 70%),
+    radial-gradient(28rem 16rem at 78% 22%, rgba(42, 230, 185, .12), transparent 70%);
+}
+
+.hero h1 { animation: rise .7s cubic-bezier(.2, .7, .3, 1) both; }
+.hero p.lede { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .08s both; }
+.hero .cta { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .16s both; }
+.hero .note { animation: rise .7s cubic-bezier(.2, .7, .3, 1) .24s both; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Buttons ----------------------------------------------------------------- */
+.btn {
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  will-change: transform;
+}
+.btn-primary {
+  background: var(--brand);
+  border: 0;
+  box-shadow: 0 6px 18px var(--glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px var(--glow); }
+.btn-secondary:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn:active { transform: translateY(0); }
+
+/* Hero video --------------------------------------------------------------
+   A gradient hairline done as a padded wrapper, because border-image can't do
+   rounded corners. The inner radius is 1px tighter so the ramp reads as a rim
+   rather than a stripe. */
+.hero-video {
+  margin: 2.75rem auto 0;
+  max-width: 46rem;
+  padding: 1px;
+  border-radius: 17px;
+  background: var(--brand);
+  box-shadow: var(--shadow-lg);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.hero-video:hover { transform: translateY(-3px); }
+.hero-video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  background: #000;
+}
+
+/* Cards ------------------------------------------------------------------- */
+.pillar, .plan, .privacy-callout {
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.pillar:hover, .plan:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: color-mix(in srgb, var(--brand-2) 40%, var(--border));
+}
+.pillar .icon {
+  font-size: 1.7rem;
+  transition: transform .25s cubic-bezier(.2, .7, .3, 1);
+}
+.pillar:hover .icon { transform: scale(1.12) rotate(-4deg); }
+
+.plan.featured { box-shadow: 0 0 0 1px var(--brand-2), var(--shadow); }
+.plan.featured .price {
+  background: var(--brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section headings get a short gradient rule, which is enough to structure the
+   page without another border line. */
+section h2 { position: relative; padding-block-end: .55rem; }
+section h2::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  width: 2.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--brand);
+}
+
+.privacy-callout { position: relative; overflow: hidden; border-inline-start-color: transparent; }
+.privacy-callout::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--brand);
+}
+.privacy-callout:hover { box-shadow: var(--shadow); }
+
+.feature h4 { transition: color .18s ease; }
+.feature:hover h4 { color: var(--brand-2); }
+
+/* Scroll reveal -----------------------------------------------------------
+   .reveal is inert until the inline observer in the page adds .in-view, so a
+   no-JS visitor sees the content immediately rather than a blank column. The
+   observer adds .js-reveal to <html> first; without it these rules never apply. */
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .6s cubic-bezier(.2, .7, .3, 1), transform .6s cubic-bezier(.2, .7, .3, 1);
+}
+.js-reveal .reveal.in-view { opacity: 1; transform: none; }
+
+/* Focus visibility. The gradient buttons drop the default outline contrast, so
+   put it back explicitly rather than relying on the UA default. */
+a:focus-visible, .btn:focus-visible, summary:focus-visible, video:focus-visible {
+  outline: 2px solid var(--brand-2);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Motion is decoration. Someone who has asked the OS for less of it gets the
+   same page, static — including the hero entrance, which would otherwise be the
+   first thing they see move. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero h1, .hero p.lede, .hero .cta, .hero .note { animation: none; }
+  .js-reveal .reveal { opacity: 1; transform: none; transition: none; }
+  .btn, .pillar, .plan, .hero-video, .pillar .icon { transition: none; }
+  .btn:hover, .pillar:hover, .plan:hover, .hero-video:hover { transform: none; }
+}

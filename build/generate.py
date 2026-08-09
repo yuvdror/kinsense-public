@@ -178,12 +178,27 @@ def render(loc: dict) -> str:
     <p class="note">{e(loc["note"])}</p>
   </div>
 
-  <div class="pillars">
+  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
+       path entirely, and the poster is the brand frame rather than a mid-clip
+       still. Native controls so it behaves correctly on iOS, where inline
+       playback and the fullscreen affordance are the platform's job, not ours. -->
+  <figure class="hero-video reveal">
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="{asset("poster.jpg")}"
+      aria-label="{e(loc["video_label"])}">
+      <source src="{asset("tribesentry.mp4")}" type="video/mp4">
+    </video>
+  </figure>
+
+  <div class="pillars reveal">
 {pillars}
   </div>
 </div>
 
-<section id="features">
+<section id="features" class="reveal">
   <div class="wrap">
     <h2>{e(loc["features_h2"])}</h2>
     <p class="sub">{e(loc["features_sub"])}</p>
@@ -193,7 +208,7 @@ def render(loc: dict) -> str:
   </div>
 </section>
 
-<section id="privacy">
+<section id="privacy" class="reveal">
   <div class="wrap">
     <h2>{e(loc["privacy_h2"])}</h2>
     <p class="sub">{e(loc["privacy_sub"])}</p>
@@ -207,7 +222,7 @@ def render(loc: dict) -> str:
   </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="reveal">
   <div class="wrap">
     <h2>{e(loc["pricing_h2"])}</h2>
     <p class="sub">{e(loc["pricing_sub"])}</p>
@@ -242,6 +257,31 @@ def render(loc: dict) -> str:
     <p class="disclaimer">{e(loc["disclaimer"])}</p>
   </div>
 </footer>
+
+<!-- Scroll reveal. The stylesheet only hides .reveal under .js-reveal on <html>,
+     which this script adds — so with JS off, or if this fails, everything is
+     visible rather than a blank column. Elements unobserve once shown; they
+     never animate back out. Skipped entirely when the OS asks for less motion,
+     so nothing is hidden and then revealed for someone who won't see the
+     transition. Inline because the CSP allows 'unsafe-inline' for scripts but
+     the site ships no JS bundle. -->
+<script>
+(function () {{
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  document.documentElement.classList.add('js-reveal');
+  var io = new IntersectionObserver(function (entries) {{
+    entries.forEach(function (entry) {{
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    }});
+  }}, {{ rootMargin: '0px 0px -10% 0px', threshold: 0.08 }});
+  els.forEach(function (el) {{ io.observe(el); }});
+}})();
+</script>
 
 </body>
 </html>

@@ -70,7 +70,22 @@
     <p class="note">Android и iPhone · 11 языков · SOS и определение аварии бесплатны</p>
   </div>
 
-  <div class="pillars">
+  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
+       path entirely, and the poster is the brand frame rather than a mid-clip
+       still. Native controls so it behaves correctly on iOS, where inline
+       playback and the fullscreen affordance are the platform's job, not ours. -->
+  <figure class="hero-video reveal">
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="/poster.jpg"
+      aria-label="TribeSentry за минуту">
+      <source src="/tribesentry.mp4" type="video/mp4">
+    </video>
+  </figure>
+
+  <div class="pillars reveal">
     <div class="pillar">
       <span class="icon" aria-hidden="true">🗺️</span>
       <h3>Работает офлайн</h3>
@@ -89,7 +104,7 @@
   </div>
 </div>
 
-<section id="features">
+<section id="features" class="reveal">
   <div class="wrap">
     <h2>Что внутри</h2>
     <p class="sub">Всё, чего ждёшь от приложения для семьи, плюс то, что начинает иметь значение, когда связь действительно пропала.</p>
@@ -130,7 +145,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section id="privacy" class="reveal">
   <div class="wrap">
     <h2>Ваше местоположение — не товар</h2>
     <p class="sub">Делиться геолокацией имеет смысл, только если понятно, куда уходят данные. Вот куда именно.</p>
@@ -147,7 +162,7 @@
   </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="reveal">
   <div class="wrap">
     <h2>Цены</h2>
     <p class="sub">Функции безопасности — бесплатные. Платите за глубину истории, потому что именно она реально стоит нам хранения.</p>
@@ -189,6 +204,31 @@
     <p class="disclaimer">Определение аварии работает по датчикам телефона. Оно может пропустить настоящую аварию и может сработать ложно; это не замена экстренным службам. Постоянная работа GPS в фоновом режиме может сократить время работы батареи.</p>
   </div>
 </footer>
+
+<!-- Scroll reveal. The stylesheet only hides .reveal under .js-reveal on <html>,
+     which this script adds — so with JS off, or if this fails, everything is
+     visible rather than a blank column. Elements unobserve once shown; they
+     never animate back out. Skipped entirely when the OS asks for less motion,
+     so nothing is hidden and then revealed for someone who won't see the
+     transition. Inline because the CSP allows 'unsafe-inline' for scripts but
+     the site ships no JS bundle. -->
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  document.documentElement.classList.add('js-reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
 
 </body>
 </html>

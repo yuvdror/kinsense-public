@@ -70,7 +70,22 @@
     <p class="note">AndroidとiPhone · 11言語 · SOSと事故検知は無料</p>
   </div>
 
-  <div class="pillars">
+  <!-- Click-to-play, not autoplay: preload="none" keeps 2.5 MB off the critical
+       path entirely, and the poster is the brand frame rather than a mid-clip
+       still. Native controls so it behaves correctly on iOS, where inline
+       playback and the fullscreen affordance are the platform's job, not ours. -->
+  <figure class="hero-video reveal">
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="/poster.jpg"
+      aria-label="1分でわかるTribeSentry">
+      <source src="/tribesentry.mp4" type="video/mp4">
+    </video>
+  </figure>
+
+  <div class="pillars reveal">
     <div class="pillar">
       <span class="icon" aria-hidden="true">🗺️</span>
       <h3>オフラインで動きます</h3>
@@ -89,7 +104,7 @@
   </div>
 </div>
 
-<section id="features">
+<section id="features" class="reveal">
   <div class="wrap">
     <h2>できること</h2>
     <p class="sub">家族向け位置情報アプリに期待するものすべてと、本当に圏外になってはじめて意味を持つもの。</p>
@@ -130,7 +145,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section id="privacy" class="reveal">
   <div class="wrap">
     <h2>あなたの位置情報は商品ではありません</h2>
     <p class="sub">位置情報の共有は、データの行き先を信頼できてはじめて成り立ちます。ですので、その行き先をそのまま書きます。</p>
@@ -147,7 +162,7 @@
   </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="reveal">
   <div class="wrap">
     <h2>料金</h2>
     <p class="sub">安全に関わる機能が無料のほうです。課金は履歴の長さに対してです。実際に保存費用がかかるのがそこだからです。</p>
@@ -189,6 +204,31 @@
     <p class="disclaimer">事故検知はスマートフォンのセンサーにもとづく推定です。実際の事故を検知できないことも、誤って検知することもあり、緊急通報サービスの代わりにはなりません。バックグラウンドでGPSを継続して使用すると、バッテリーの消耗が早まる場合があります。</p>
   </div>
 </footer>
+
+<!-- Scroll reveal. The stylesheet only hides .reveal under .js-reveal on <html>,
+     which this script adds — so with JS off, or if this fails, everything is
+     visible rather than a blank column. Elements unobserve once shown; they
+     never animate back out. Skipped entirely when the OS asks for less motion,
+     so nothing is hidden and then revealed for someone who won't see the
+     transition. Inline because the CSP allows 'unsafe-inline' for scripts but
+     the site ships no JS bundle. -->
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !('IntersectionObserver' in window)) return;
+  var els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  document.documentElement.classList.add('js-reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in-view');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+  els.forEach(function (el) { io.observe(el); });
+})();
+</script>
 
 </body>
 </html>
