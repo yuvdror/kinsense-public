@@ -26,6 +26,10 @@
     {
       "source": "/join/:code",
       "destination": "/join.html"
+    },
+    {
+      "source": "/join",
+      "destination": "/join.html"
     }
   ],
   "headers": [
