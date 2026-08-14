@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["QZ4LSA2LG4.com.kinsense.KinSense"],
+        "components": [
+          {
+            "/": "/join/*",
+            "comment": "Tribe invite links open the app straight on the join flow."
+          }
+        ]
+      }
+    ]
+  }
+}

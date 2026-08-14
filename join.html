@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join a tribe on TribeSentry</title>
+<meta name="description" content="You have been invited to a tribe on TribeSentry — live location, SOS and crash alerts for the people you care about.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="/">Tribe<span>Sentry</span></a>
+  </div>
+</header>
+
+<div class="wrap doc">
+  <h1>You have been invited to a tribe</h1>
+
+  <!--
+    Anyone who already has the app never sees this page: iOS matches the URL against
+    /.well-known/apple-app-site-association and opens the app instead. So this is
+    written for the person who doesn't have it yet — say what the app is, and give
+    them the code so the invite survives even if they install it later by hand.
+  -->
+  <p class="lede-sm">TribeSentry puts everyone in your tribe on one live map, with SOS and automatic crash alerts. Install the app, create an account, and this invite takes you straight in.</p>
+
+  <p>Your invite code is <strong id="code">—</strong>. Keep it: if the link stops working, you can enter this code in the app under <em>Join tribe</em>.</p>
+
+  <p><a class="btn" id="store" href="https://apps.apple.com/app/id6798410492">Get TribeSentry for iPhone</a></p>
+
+  <p class="lede-sm">Joining is a request, not a key. The head of the tribe approves you before you can see the map, the member list or anybody's location — and nobody sees your location until you choose to share it.</p>
+
+  <p><a href="/">What is TribeSentry?</a> &middot; <a href="/privacy">Privacy policy</a></p>
+</div>
+
+<script>
+  // The code is the last path segment: /join/AB12CD34
+  var parts = window.location.pathname.split('/').filter(Boolean);
+  var code = parts.length > 1 ? decodeURIComponent(parts[parts.length - 1]).toUpperCase() : '';
+  if (code) {
+    document.getElementById('code').textContent = code;
+  } else {
+    document.getElementById('code').textContent = 'in your invite message';
+  }
+</script>
+
+</body>
+</html>

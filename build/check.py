@@ -176,6 +176,11 @@ def main() -> int:
             indexable = {
                 p for p in pages
                 if p.name != "auth-callback.html"  # Disallowed in robots.txt
+                # A page that asks not to be indexed has no business in the sitemap —
+                # the two would contradict each other. join.html is the case: one
+                # landing page per invite code, useful to whoever was sent it and to
+                # nobody else.
+                and 'name="robots" content="noindex"' not in p.read_text(encoding="utf-8")
             }
             for missing in sorted(indexable - listed):
                 errors.append(f"sitemap.xml is missing {missing.relative_to(ROOT)}")

@@ -22,6 +22,10 @@
     {
       "source": "/:lang/delete-account",
       "destination": "/:lang/delete-account.html"
+    },
+    {
+      "source": "/join/:code",
+      "destination": "/join.html"
     }
   ],
   "headers": [
@@ -61,6 +65,19 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     }
