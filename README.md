@@ -85,12 +85,18 @@ URLs. No CLI and no local credentials needed.
 In **Project → Settings → Domains**, add `tribesentry.cloud` (and `www` if you want it).
 Vercel will show you the exact DNS records to create.
 
-> **Do not move the nameservers to Vercel.** `tribesentry.cloud` carries the Resend
-> sending records — SPF and MX on `send.tribesentry.cloud`, `_dmarc.tribesentry.cloud`,
-> and the **DKIM key at the root domain**. Switching nameservers drops all of them and
-> silently breaks every password-reset and email-confirmation message the app sends,
-> which is exactly the flow `auth-callback.html` exists to serve. Leave DNS where it is
-> (IONOS) and add only the A/CNAME records Vercel asks for.
+> **Do not move the nameservers to Vercel.** IONOS is both the DNS host and the mail
+> host for `tribesentry.cloud`: the `mx00/mx01.ionos.com` records that receive mail,
+> the root SPF authorizing IONOS to send, `_dmarc`, and the DKIM key. Outbound auth
+> mail goes through IONOS SMTP, so those records are now load-bearing for *sending*
+> as well as receiving. Switching nameservers drops all of them and silently breaks
+> every password-reset and email-confirmation message the app sends — which is exactly
+> the flow `auth-callback.html` exists to serve. Leave DNS where it is and add only
+> the A/CNAME records Vercel asks for.
+>
+> (This warning previously named Resend's `send.` subdomain records. Those are being
+> retired — see the migration order in the monorepo's DEPLOY.md — but the conclusion
+> is unchanged and now applies to more records, not fewer.)
 
 Serving the site at `tribesentry.cloud` keeps `auth-callback.html` on the URL it already
 has, so **no Supabase configuration has to change**. That is the reason to use this domain
