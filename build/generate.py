@@ -45,6 +45,16 @@ FAVICONS = '\n'.join([
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">',
 ])
 
+# One card for every locale. The wordmark and the tagline on it are English, which is
+# the trade for a single 1200x630 file: a link shared anywhere renders as the product
+# instead of as a grey rectangle. Regenerate it with marketer's tools/og_card.py.
+OG_IMAGE = '\n'.join([
+    f'<meta property="og:image" content="{SITE}/og.png">',
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
+    '<meta name="twitter:card" content="summary_large_image">',
+])
+
 
 # The three pillars are the same three concepts, in the same order, in every
 # locale — offline, crash detection, privacy — so the icon is positional and the
@@ -178,6 +188,7 @@ def render(loc: dict) -> str:
 <meta property="og:type" content="website">
 <meta property="og:url" content="{url_for(code)}">
 <meta property="og:locale" content="{OG_TERRITORY[loc["lang"]]}">
+{OG_IMAGE}
 {hreflangs(code)}
 {FAVICONS}
 <link rel="stylesheet" href="{asset("style.css")}">
@@ -355,6 +366,11 @@ def render_deletion(loc: dict) -> str:
 {alts}
 <link rel="alternate" hreflang="x-default" href="{deletion_url("")}">
 <link rel="canonical" href="{deletion_url(code)}">
+<meta property="og:title" content="{html.escape(d["title"])}">
+<meta property="og:description" content="{html.escape(d["desc"])}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{deletion_url(code)}">
+{OG_IMAGE}
 {FAVICONS}
 <link rel="stylesheet" href="{asset("style.css")}">
 </head>
