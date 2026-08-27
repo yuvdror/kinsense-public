@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TribeSentry — affiliate admin</title>
+<!-- Not a public page. robots.txt disallows it too; this is the belt to that's braces. -->
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="stylesheet" href="/style.css">
+<style>
+  /* The console is a table-dense screen the marketing stylesheet was never built for,
+     so it carries its own layout on top of the shared palette. The site is light/dark
+     responsive, so every colour below resolves through those tokens rather than being
+     written literally — a hardcoded hex here would be unreadable in one of the two. */
+  :root {
+    --ok: #0f8a5f; --ok-bg: rgba(42, 230, 185, .16);
+    --warn: #b45309; --warn-bg: rgba(180, 83, 9, .12);
+    --info: #1d6fa5; --info-bg: rgba(32, 159, 221, .14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ok: #2ae6b9; --ok-bg: rgba(42, 230, 185, .14);
+      --warn: #f0b429; --warn-bg: rgba(240, 180, 41, .14);
+      --info: #6ec8f0; --info-bg: rgba(110, 200, 240, .14);
+    }
+  }
+
+  .console { max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem 6rem; }
+  .console h1 { font-size: 1.6rem; margin: 0 0 .25rem; letter-spacing: -.02em; }
+  .console h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .09em;
+                color: var(--muted); margin: 2.5rem 0 .9rem; font-weight: 700; }
+  .sub { color: var(--muted); font-size: .9rem; margin: 0 0 1.75rem; }
+
+  .tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+  .tile { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; padding: 1rem 1.1rem; }
+  .tile .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+  .tile .value { font-size: 1.75rem; font-weight: 700; margin-top: .35rem; letter-spacing: -.03em; }
+  .tile .value.money { color: var(--ok); }
+  .tile .foot { color: var(--muted); font-size: .75rem; margin-top: .25rem; }
+
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: .9rem; overflow: hidden; }
+  /* Tables scroll inside the panel; the page itself must never scroll sideways. */
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em;
+       color: var(--muted); padding: .75rem .9rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: .75rem .9rem; border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.money { color: var(--ok); font-weight: 700; }
+  .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .who { color: var(--muted); font-size: .78rem; }
+
+  .pill { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .68rem;
+          font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .pill.approved { background: var(--ok-bg); color: var(--ok); }
+  .pill.pending  { background: var(--warn-bg); color: var(--warn); }
+  .pill.suspended, .pill.void { background: var(--border); color: var(--muted); }
+  .pill.paid { background: var(--info-bg); color: var(--info); }
+
+  button.act { background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+               border-radius: .55rem; padding: .35rem .75rem; font: inherit; font-size: .82rem;
+               font-weight: 600; cursor: pointer; }
+  button.act:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  button.act:disabled { opacity: .45; cursor: default; }
+  button.act.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  button.act.primary:hover:not(:disabled) { filter: brightness(1.08); color: var(--accent-fg); }
+
+  input, select { background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+                  border-radius: .55rem; padding: .5rem .65rem; font: inherit; font-size: .88rem; }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input.rate { width: 5.2rem; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .bar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: .9rem; }
+  .bar .spacer { flex: 1; }
+
+  .login { max-width: 24rem; margin: 12vh auto; }
+  .login form { display: grid; gap: .75rem; background: var(--card); border: 1px solid var(--border);
+                border-radius: .9rem; padding: 1.5rem; }
+  .login input { width: 100%; }
+
+  .msg { border-radius: .6rem; padding: .7rem .9rem; font-size: .88rem; margin: .9rem 0; }
+  .msg.error { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
+  .empty { padding: 2.1rem; text-align: center; color: var(--muted); font-size: .88rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="site"><div class="wrap" style="max-width:72rem">
+  <a class="logo" href="/">Tribe<span>Sentry</span></a>
+  <nav><a href="#" id="signOut" hidden>Sign out</a></nav>
+</div></header>
+
+<!-- ------------------------------------------------------------------ Login -->
+<main class="console login" id="loginView">
+  <h1>Affiliate admin</h1>
+  <p class="sub">Sign in with the Supabase account that holds the admin role.</p>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" autocomplete="username" required>
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
+    <button class="act primary" type="submit" id="loginBtn">Sign in</button>
+  </form>
+  <div id="loginMsg"></div>
+</main>
+
+<!-- -------------------------------------------------------------- Dashboard -->
+<main class="console" id="dashView" hidden>
+  <h1>Affiliate admin</h1>
+  <p class="sub" id="whoami"></p>
+  <div id="msg"></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>Affiliates</h2>
+  <div class="panel scroll"><table>
+    <thead><tr>
+      <th>Code</th><th>Status</th>
+      <th class="num">Referred</th><th class="num">Converted</th><th class="num">Active subs</th>
+      <th class="num">Rate / sub / mo</th><th class="num">Monthly</th><th></th>
+    </tr></thead>
+    <tbody id="affiliateRows"></tbody>
+  </table>
+  <div class="empty" id="affiliateEmpty" hidden>No affiliates have signed up yet.</div>
+  </div>
+
+  <h2>Payouts</h2>
+  <div class="bar">
+    <label class="who" for="period">Period</label>
+    <!-- Safari has no month picker and renders this as a plain text field, so it needs a hint and a shape. The API validates YYYY-MM regardless. -->
+    <input type="month" id="period" placeholder="YYYY-MM" pattern="\d{4}-\d{2}" style="min-width:9rem">
+    <button class="act primary" id="closeBtn">Close period</button>
+    <button class="act" id="allBtn">Show all</button>
+    <span class="spacer"></span>
+    <span class="who" id="payoutHint"></span>
+  </div>
+  <div class="panel scroll"><table>
+    <thead><tr>
+      <th>Period</th><th>Code</th>
+      <th class="num">Subs</th><th class="num">Rate</th><th class="num">Amount</th>
+      <th>Status</th><th>Note</th><th></th>
+    </tr></thead>
+    <tbody id="payoutRows"></tbody>
+  </table>
+  <div class="empty" id="payoutEmpty" hidden>Nothing closed yet. Closing a period freezes what each affiliate earned that month.</div>
+  </div>
+</main>
+
+<script>
+// Affiliate admin console.
+//
+// Deliberately dependency-free: the rest of this site is static, and pulling a
+// bundler in for one internal screen would be the largest thing in the repo. Auth is
+// GoTrue's REST API directly, and the data comes from the `admin` router on the
+// Supabase Edge Function, which is where the authorization actually lives — this page
+// is a renderer and nothing more. Hiding a button here protects nothing; every route
+// it calls re-checks the caller's role server-side.
+//
+// KEEP IN SYNC with the connect-src directive in vercel.json.
+const CFG = {
+  url: "https://yindkqtxilizeqjfuclg.supabase.co",
+  key: "sb_publishable_cJcK5rsTOw8UlL5krsLBTw_J4x0jNdE",
+};
+const API = CFG.url + "/functions/v1/api/admin";
+
+// sessionStorage, not localStorage: an admin token that outlives the tab is a token
+// left behind on a shared machine. Signing in again is three seconds.
+const TOKENS = {
+  get access() { return sessionStorage.getItem("sb_access"); },
+  get refresh() { return sessionStorage.getItem("sb_refresh"); },
+  set(access, refresh) {
+    sessionStorage.setItem("sb_access", access);
+    if (refresh) sessionStorage.setItem("sb_refresh", refresh);
+  },
+  clear() { sessionStorage.removeItem("sb_access"); sessionStorage.removeItem("sb_refresh"); },
+};
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[<>&"']/g, (c) =>
+  ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (cents) =>
+  "$" + (Number(cents || 0) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function note(where, text, kind) {
+  $(where).innerHTML = text ? `<div class="msg ${kind || "error"}">${esc(text)}</div>` : "";
+}
+
+// --- auth ------------------------------------------------------------------
+
+async function signIn(email, password) {
+  const r = await fetch(`${CFG.url}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: CFG.key },
+    body: JSON.stringify({ email, password }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error_description || body.msg || "Sign-in failed");
+  TOKENS.set(body.access_token, body.refresh_token);
+}
+
+/** Access tokens last an hour and this is a screen people leave open. One silent
+ *  refresh attempt on a 401 is the difference between a console and a nuisance. */
+async function refreshSession() {
+  const refresh_token = TOKENS.refresh;
+  if (!refresh_token) return false;
+  const r = await fetch(`${CFG.url}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: CFG.key },
+    body: JSON.stringify({ refresh_token }),
+  });
+  if (!r.ok) return false;
+  const body = await r.json();
+  TOKENS.set(body.access_token, body.refresh_token);
+  return true;
+}
+
+/** Every call to the admin API. Retries once behind a token refresh; anything still
+ *  4xx after that means this account is not an admin (the API answers 404, not 403,
+ *  so the surface does not announce itself to whoever is asking). */
+async function api(path, options = {}, retry = true) {
+  const r = await fetch(API + path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      apikey: CFG.key,
+      Authorization: "Bearer " + TOKENS.access,
+      ...(options.headers || {}),
+    },
+  });
+  if (r.status === 401 && retry && await refreshSession()) return api(path, options, false);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error || `Request failed (${r.status})`);
+  return body;
+}
+
+// --- rendering -------------------------------------------------------------
+
+function renderTiles(t) {
+  const tiles = [
+    { label: "Approved", value: t.approved,
+      foot: t.pendingApproval ? `${t.pendingApproval} waiting for approval` : "none waiting" },
+    { label: "Referred users", value: t.referred, foot: "attributed, all time" },
+    { label: "Active subscriptions", value: t.activeSubs, foot: "what the payout counts" },
+    { label: "Monthly run rate", value: money(t.monthlyCents), money: true, foot: "if closed today" },
+    { label: "Outstanding", value: money(t.outstandingCents), money: true, foot: "closed, not yet paid" },
+  ];
+  $("tiles").innerHTML = tiles.map((x) => `
+    <div class="tile">
+      <div class="label">${esc(x.label)}</div>
+      <div class="value${x.money ? " money" : ""}">${esc(x.value)}</div>
+      <div class="foot">${esc(x.foot)}</div>
+    </div>`).join("");
+}
+
+function renderAffiliates(rows) {
+  $("affiliateEmpty").hidden = rows.length > 0;
+  $("affiliateRows").innerHTML = rows.map((a) => {
+    // The action offered is the one that changes state in the useful direction:
+    // approve someone pending, suspend someone live, restore someone stopped.
+    const next = a.status === "approved"
+      ? { label: "Suspend", status: "suspended" }
+      : { label: "Approve", status: "approved" };
+    return `<tr>
+      <td><span class="code">/r/${esc(a.code)}</span><br>
+          <span class="who">${esc(a.display_name || "—")}</span></td>
+      <td><span class="pill ${esc(a.status)}">${esc(a.status)}</span></td>
+      <td class="num">${esc(a.referred_total)}</td>
+      <td class="num">${esc(a.converted_total)}</td>
+      <td class="num">${esc(a.active_subs)}</td>
+      <td class="num">
+        <input class="rate" type="number" min="0" step="0.01"
+               value="${(Number(a.payout_cents_per_sub_month) / 100).toFixed(2)}"
+               data-rate="${esc(a.id)}">
+      </td>
+      <td class="num money">${a.status === "approved" ? money(a.monthly_cents) : "—"}</td>
+      <td><button class="act" data-status="${esc(next.status)}"
+                  data-id="${esc(a.id)}">${esc(next.label)}</button></td>
+    </tr>`;
+  }).join("");
+
+  $("affiliateRows").querySelectorAll("button[data-id]").forEach((b) => {
+    b.onclick = () => patchAffiliate(b.dataset.id, { status: b.dataset.status }, b);
+  });
+  // Commit a rate on blur rather than on every keystroke: one write per edit, and the
+  // number the admin is halfway through typing is not a rate anybody agreed to.
+  $("affiliateRows").querySelectorAll("input[data-rate]").forEach((i) => {
+    const original = i.value;
+    i.onblur = () => {
+      if (i.value === original) return;
+      const cents = Math.round(parseFloat(i.value) * 100);
+      if (!Number.isFinite(cents) || cents < 0) { i.value = original; return; }
+      patchAffiliate(i.dataset.rate, { payoutCentsPerSubMonth: cents }, i);
+    };
+  });
+}
+
+function renderPayouts(rows) {
+  $("payoutEmpty").hidden = rows.length > 0;
+  $("payoutRows").innerHTML = rows.map((p) => `
+    <tr>
+      <td>${esc(String(p.period_month).slice(0, 7))}</td>
+      <td class="code">${esc(p.affiliates?.code ?? "—")}</td>
+      <td class="num">${esc(p.subscription_count)}</td>
+      <td class="num">${money(p.rate_cents)}</td>
+      <td class="num money">${money(p.amount_cents)}</td>
+      <td><span class="pill ${esc(p.status)}">${esc(p.status)}</span></td>
+      <td class="who">${esc(p.note || "—")}</td>
+      <td>
+        ${p.status === "pending"
+          ? `<button class="act primary" data-pay="${esc(p.id)}">Mark paid</button>
+             <button class="act" data-void="${esc(p.id)}">Void</button>`
+          : `<button class="act" data-reopen="${esc(p.id)}">Reopen</button>`}
+      </td>
+    </tr>`).join("");
+
+  const wire = (attr, patch) =>
+    $("payoutRows").querySelectorAll(`button[data-${attr}]`).forEach((b) => {
+      b.onclick = () => patchPayout(b.dataset[attr], patch(b), b);
+    });
+  wire("pay", () => ({ status: "paid", note: prompt("Payment reference (optional)") || undefined }));
+  wire("void", () => ({ status: "void" }));
+  wire("reopen", () => ({ status: "pending" }));
+}
+
+// --- actions ---------------------------------------------------------------
+
+async function patchAffiliate(id, patch, el) {
+  el.disabled = true;
+  try {
+    await api(`/affiliates/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    await loadAffiliates();
+  } catch (e) { note("msg", e.message); el.disabled = false; }
+}
+
+async function patchPayout(id, patch, el) {
+  el.disabled = true;
+  try {
+    await api(`/payouts/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+    await Promise.all([loadPayouts(), loadAffiliates()]);
+  } catch (e) { note("msg", e.message); el.disabled = false; }
+}
+
+async function loadAffiliates() {
+  const { affiliates, totals } = await api("/affiliates");
+  renderTiles(totals);
+  renderAffiliates(affiliates);
+}
+
+async function loadPayouts() {
+  const period = $("period").value;
+  const { payouts } = await api("/payouts" + (period ? `?period=${period}` : ""));
+  renderPayouts(payouts);
+  $("payoutHint").textContent = period
+    ? `${payouts.length} row${payouts.length === 1 ? "" : "s"} in ${period}`
+    : `${payouts.length} row${payouts.length === 1 ? "" : "s"}, all periods`;
+}
+
+$("closeBtn").onclick = async () => {
+  const period = $("period").value;
+  if (!period) return note("msg", "Pick a month to close.");
+  if (!confirm(`Close ${period}? This freezes what each approved affiliate earned that month. Closing again later changes nothing.`)) return;
+  $("closeBtn").disabled = true;
+  try {
+    const r = await api("/payouts/close", { method: "POST", body: JSON.stringify({ period }) });
+    note("msg", r.created
+      ? `Closed ${period}: ${r.created} payout${r.created === 1 ? "" : "s"}, ${money(r.amountCents)}.`
+      : `Nothing to close for ${period} — no approved affiliate had an active subscription, or it was already closed.`,
+      r.created ? "ok" : "error");
+    await Promise.all([loadPayouts(), loadAffiliates()]);
+  } catch (e) { note("msg", e.message); }
+  $("closeBtn").disabled = false;
+};
+
+$("allBtn").onclick = () => { $("period").value = ""; loadPayouts().catch((e) => note("msg", e.message)); };
+$("period").onchange = () => loadPayouts().catch((e) => note("msg", e.message));
+
+// --- boot ------------------------------------------------------------------
+
+async function showDashboard() {
+  const me = await api("/me");
+  $("loginView").hidden = true;
+  $("dashView").hidden = false;
+  $("signOut").hidden = false;
+  $("whoami").textContent = `Signed in as ${me.email ?? "admin"}.`;
+  const now = new Date();
+  $("period").value = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+  await Promise.all([loadAffiliates(), loadPayouts()]);
+}
+
+$("loginForm").onsubmit = async (e) => {
+  e.preventDefault();
+  $("loginBtn").disabled = true;
+  note("loginMsg", "");
+  try {
+    await signIn($("email").value.trim(), $("password").value);
+    await showDashboard();
+  } catch (err) {
+    TOKENS.clear();
+    // A valid account that is not an admin gets the API's 404. Say what it means here
+    // rather than showing "Not found", which would read like a broken page.
+    note("loginMsg", /not found/i.test(err.message)
+      ? "That account is not an admin."
+      : err.message);
+  }
+  $("loginBtn").disabled = false;
+};
+
+$("signOut").onclick = (e) => { e.preventDefault(); TOKENS.clear(); location.reload(); };
+
+// A live token from an earlier tab means straight to the dashboard; anything wrong
+// with it means the login form, quietly.
+if (TOKENS.access) showDashboard().catch(() => TOKENS.clear());
+</script>
+</body>
+</html>

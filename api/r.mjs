@@ -11,7 +11,9 @@
 // else.
 //
 // So all this does is: check the code names a real, approved affiliate, remember it in a
-// cookie, and send the visitor to the App Store.
+// cookie, and send the visitor to the App Store. The member's reward — 30 free days on
+// the paid tier — is granted by POST /api/referral once an account exists to grant it to,
+// which is why this page promises it but does not issue it.
 //
 // Env (set in the Vercel project, not here):
 //   SUPABASE_URL                 https://yindkqtxilizeqjfuclg.supabase.co
@@ -94,8 +96,9 @@ function page(who, appStore) {
 </head><body>
 <main class="wrap" style="max-width:38rem;padding:4rem 1.25rem">
   <h1>You were invited by ${safe}</h1>
-  <p>Install TribeSentry and your discount is applied when you subscribe. Live location,
-     SOS and crash detection are free either way.</p>
+  <p>Install TribeSentry and your first <strong>30 days of Plus</strong> are on us —
+     the full location history and unlimited places included. Nothing to enter and no card
+     needed. Live location, SOS and crash detection are free either way.</p>
   <p><a class="cta" href="${appStore}">Get TribeSentry on the App Store</a></p>
   <p style="font-size:.85rem;opacity:.7">Open this link on the iPhone you'll use the app
      on — the invite is remembered in this browser.</p>

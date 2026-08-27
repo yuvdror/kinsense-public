@@ -5,4 +5,8 @@ Allow: /
 # in a search result where someone might mistake it for a sign-in page.
 Disallow: /auth-callback.html
 
+# The affiliate admin console. Nothing here is public.
+Disallow: /admin
+Disallow: /admin.html
+
 Sitemap: https://tribesentry.cloud/sitemap.xml
