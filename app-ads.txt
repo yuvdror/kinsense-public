@@ -1,0 +1,10 @@
+# app-ads.txt — IAB Tech Lab spec. Authorises AdMob to sell inventory in our apps.
+#
+# AdMob will not verify an app, and therefore will not serve ads to it, until this
+# file is reachable at the root of the developer website listed on the app's store
+# page. Until then every ad request comes back "No ad to show" with no other clue —
+# which is exactly how ads appeared broken while the SDK, consent and ad units were
+# all fine.
+#
+# The domain here must match the developer website on the store listing exactly.
+google.com, pub-1604874649136777, DIRECT, f08c47fec0942fa0
