@@ -326,3 +326,17 @@ a:focus-visible, .btn:focus-visible, summary:focus-visible {
   .btn:hover, .pillar:hover, .plan:hover { transform: none; }
   .showcase:hover .phone-lead { transform: none; }
 }
+
+/* Comparison table. Capability claims only — every row is something a reader can
+   check by installing both apps, which is the only kind of comparison worth making
+   about a competitor by name. */
+.compare-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+.compare { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: .97rem; }
+.compare th, .compare td { text-align: left; padding: .8rem 1rem; border-bottom: 1px solid var(--border); }
+.compare thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.compare tbody tr:last-child td { border-bottom: none; }
+.compare td:first-child { font-weight: 600; }
+.compare .yes { color: #1a7f4b; font-weight: 600; }
+.compare .no { color: var(--muted); }
+.compare-note { font-size: .85rem; color: var(--muted); margin-top: .9rem; }
+@media (prefers-color-scheme: dark) { .compare .yes { color: #5fca92; } }
