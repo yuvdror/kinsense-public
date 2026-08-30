@@ -1,11 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "cloud.tribesentry.app",
       "sha256_cert_fingerprints": [
-        "6A:90:D6:D2:7B:A3:00:47:A8:3C:14:F5:D7:08:40:EB:6A:26:A5:A1:41:18:86:F2:42:2D:3A:67:75:97:D3:F5"
+        "6A:90:D6:D2:7B:A3:00:47:A8:3C:14:F5:D7:08:40:EB:6A:26:A5:A1:41:18:86:F2:42:2D:3A:67:75:97:D3:F5",
+        "EA:4F:40:A7:E4:1C:5D:B3:61:21:4C:5D:6F:30:F6:F9:0C:FB:32:A4:7E:A0:D1:80:42:80:13:11:7C:B4:1F:D3"
       ]
     }
   }
