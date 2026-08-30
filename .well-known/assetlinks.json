@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cloud.tribesentry.app",
+      "sha256_cert_fingerprints": [
+        "6A:90:D6:D2:7B:A3:00:47:A8:3C:14:F5:D7:08:40:EB:6A:26:A5:A1:41:18:86:F2:42:2D:3A:67:75:97:D3:F5"
+      ]
+    }
+  }
+]
