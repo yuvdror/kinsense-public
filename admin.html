@@ -217,6 +217,42 @@ async function signIn(email, password) {
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(body.error_description || body.msg || "Sign-in failed");
   TOKENS.set(body.access_token, body.refresh_token);
+  // A password gets you aal1. If this account has enrolled a second factor, the admin
+  // API refuses aal1 (see requireAdmin), so the session has to be stepped up here or
+  // the console signs in successfully and then 403s on every request.
+  return pendingFactor(body.user);
+}
+
+/** The verified TOTP factor that still needs answering, or null. */
+function pendingFactor(user) {
+  const factors = (user?.factors || []).filter((f) => f.status === "verified" && f.factor_type === "totp");
+  return factors[0] || null;
+}
+
+/** Answer the TOTP challenge, upgrading this session to aal2.
+ *
+ *  Two calls, in GoTrue's order: create a challenge against the factor, then verify a
+ *  code against that challenge. A successful verify returns a *new* access token — the
+ *  one carrying `aal2` — so the tokens are replaced, not merely marked. */
+async function verifyFactor(factorId, code) {
+  const auth = (path, payload) => fetch(`${CFG.url}/auth/v1/${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: CFG.key,
+      Authorization: "Bearer " + TOKENS.access,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const cr = await auth(`factors/${factorId}/challenge`, {});
+  const challenge = await cr.json().catch(() => ({}));
+  if (!cr.ok) throw new Error(challenge.error_description || challenge.msg || "Could not start the challenge");
+
+  const vr = await auth(`factors/${factorId}/verify`, { challenge_id: challenge.id, code });
+  const verified = await vr.json().catch(() => ({}));
+  if (!vr.ok) throw new Error(verified.error_description || verified.msg || "That code was not accepted");
+  TOKENS.set(verified.access_token, verified.refresh_token);
 }
 
 /** Access tokens last an hour and this is a screen people leave open. One silent
@@ -445,7 +481,15 @@ $("loginForm").onsubmit = async (e) => {
   $("loginBtn").disabled = true;
   note("loginMsg", "");
   try {
-    await signIn($("email").value.trim(), $("password").value);
+    const factor = await signIn($("email").value.trim(), $("password").value);
+    if (factor) {
+      // Prompted rather than skipped. The server refuses aal1 for an account that has a
+      // factor, so a console that signed in and carried on would just 403 on every
+      // request with nothing explaining why.
+      const code = prompt("Authentication code from your authenticator app:");
+      if (!code) throw new Error("Second factor required to continue.");
+      await verifyFactor(factor.id, code.trim());
+    }
     await showDashboard();
   } catch (err) {
     TOKENS.clear();
@@ -453,7 +497,9 @@ $("loginForm").onsubmit = async (e) => {
     // rather than showing "Not found", which would read like a broken page.
     note("loginMsg", /not found/i.test(err.message)
       ? "That account is not an admin."
-      : err.message);
+      : /mfa_required|multi-factor/i.test(err.message)
+        ? "This admin account requires its second factor. Sign in again and enter the code."
+        : err.message);
   }
   $("loginBtn").disabled = false;
 };
