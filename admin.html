@@ -99,9 +99,11 @@
 <main class="console login" id="loginView">
   <h1>Affiliate admin</h1>
   <p class="sub">Sign in with the Supabase account that holds the admin role.</p>
-  <form id="loginForm">
-    <input type="email" id="email" placeholder="Email" autocomplete="username" required>
-    <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
+  <!-- `name` as well as `id`: Safari and several password managers key their heuristics
+       off the field name, and without it this form was never offered for saving. -->
+  <form id="loginForm" method="post" action="#">
+    <input type="email" id="email" name="email" placeholder="Email" autocomplete="username" required>
+    <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required>
     <button class="act primary" type="submit" id="loginBtn">Sign in</button>
   </form>
   <div id="loginMsg"></div>
@@ -467,6 +469,14 @@ $("period").onchange = () => loadPayouts().catch((e) => note("msg", e.message));
 
 async function showDashboard() {
   const me = await api("/me");
+  // Removed from the DOM, not just hidden.
+  //
+  // The browser decides a login succeeded by watching what happens to the form. This
+  // page cancels its own submit and swaps views, so nothing navigates — and a form that
+  // is merely `hidden` still looks, to the heuristic, like a login that never completed.
+  // That is why no password manager ever offered to save this one. Removing it is the
+  // signal they are actually looking for.
+  $("loginForm")?.remove();
   $("loginView").hidden = true;
   $("dashView").hidden = false;
   $("signOut").hidden = false;
@@ -481,7 +491,9 @@ $("loginForm").onsubmit = async (e) => {
   $("loginBtn").disabled = true;
   note("loginMsg", "");
   try {
-    const factor = await signIn($("email").value.trim(), $("password").value);
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    const factor = await signIn(email, password);
     if (factor) {
       // Prompted rather than skipped. The server refuses aal1 for an account that has a
       // factor, so a console that signed in and carried on would just 403 on every
@@ -490,6 +502,23 @@ $("loginForm").onsubmit = async (e) => {
       if (!code) throw new Error("Second factor required to continue.");
       await verifyFactor(factor.id, code.trim());
     }
+    // Ask the browser to save it, explicitly.
+    //
+    // The heuristics above are best-effort and differ per browser; this is the actual
+    // API for the job, and it is what makes the save prompt appear reliably in Chrome
+    // and Edge. It hands the credential to the *browser's* password store — the same
+    // place a normal form submission would — and nothing here transmits it anywhere
+    // other than to Supabase's own auth endpoint.
+    //
+    // Feature-detected: Safari and Firefox do not implement it, and fall back to the
+    // form heuristics that the `name` attributes and the removal above now satisfy.
+    try {
+      if (window.PasswordCredential && navigator.credentials?.store) {
+        await navigator.credentials.store(
+          new PasswordCredential({ id: email, password, name: email }),
+        );
+      }
+    } catch { /* a declined or unsupported save must never block signing in */ }
     await showDashboard();
   } catch (err) {
     TOKENS.clear();
