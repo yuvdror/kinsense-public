@@ -85,6 +85,19 @@
   .msg.error { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); }
   .msg.ok { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok); }
   .empty { padding: 2.1rem; text-align: center; color: var(--muted); font-size: .88rem; }
+
+  /* Second-factor enrolment. Shown only while the account has no verified factor —
+     which, until this existed, was every account, because nothing could enrol one. */
+  .mfa { background: var(--card); border: 1px solid var(--warn); border-radius: .9rem;
+         padding: 1.1rem 1.2rem; margin: 0 0 1.5rem; }
+  .mfa h2 { margin-top: 0; color: var(--warn); }
+  .mfa .steps { display: flex; flex-wrap: wrap; gap: 1.4rem; align-items: flex-start; }
+  .mfa img { width: 11rem; height: 11rem; background: #fff; border-radius: .5rem; padding: .5rem; }
+  .mfa .manual { flex: 1; min-width: 15rem; }
+  .mfa .secret { user-select: all; word-break: break-all; display: inline-block;
+                 background: var(--bg); border: 1px solid var(--border); border-radius: .4rem;
+                 padding: .35rem .55rem; margin: .3rem 0 .8rem; }
+  .mfa form { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -114,6 +127,31 @@
   <h1>Affiliate admin</h1>
   <p class="sub" id="whoami"></p>
   <div id="msg"></div>
+
+  <!-- Second factor. Hidden once the account has a verified one; requireAdmin then
+       refuses aal1 for this account on every call, with no env var to remember. -->
+  <section class="mfa" id="mfaPanel" hidden>
+    <h2>Two-factor authentication is off</h2>
+    <p class="sub" id="mfaIntro">This console approves affiliates and closes payouts, and
+      a password is the only thing standing in front of it. Enrol an authenticator app and
+      the API starts refusing password-only sessions for this account automatically.</p>
+    <div id="mfaSetup" hidden>
+      <div class="steps">
+        <img id="mfaQr" alt="Enrolment QR code for your authenticator app">
+        <div class="manual">
+          <p class="who">Scan the code, or enter this secret by hand:</p>
+          <code class="secret code" id="mfaSecret"></code>
+          <form id="mfaForm">
+            <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code"
+                   placeholder="6-digit code" required>
+            <button class="act primary" type="submit" id="mfaVerifyBtn">Turn it on</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <button class="act primary" id="mfaStartBtn">Set up two-factor authentication</button>
+    <div id="mfaMsg"></div>
+  </section>
 
   <div class="tiles" id="tiles"></div>
 
@@ -255,6 +293,55 @@ async function verifyFactor(factorId, code) {
   const verified = await vr.json().catch(() => ({}));
   if (!vr.ok) throw new Error(verified.error_description || verified.msg || "That code was not accepted");
   TOKENS.set(verified.access_token, verified.refresh_token);
+}
+
+/** One GoTrue auth call with the session's bearer token. */
+function authCall(path, payload, method = "POST") {
+  return fetch(`${CFG.url}/auth/v1/${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      apikey: CFG.key,
+      Authorization: "Bearer " + TOKENS.access,
+    },
+    ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
+  });
+}
+
+/** The signed-in user, straight from GoTrue, for its `factors` array. */
+async function currentUser() {
+  const r = await authCall("user", undefined, "GET");
+  if (!r.ok) throw new Error("Could not read the account");
+  return await r.json();
+}
+
+/** Begin TOTP enrolment: returns { id, secret, qr } for the panel to render.
+ *
+ *  Unverified factors are cleared first. An abandoned attempt leaves one behind, and
+ *  GoTrue then refuses the next enrolment for colliding with its friendly name — which
+ *  presents as "you already have MFA" on a console that plainly does not, and there is
+ *  no UI anywhere to clear it. Deleting only `unverified` ones cannot touch a factor
+ *  that is actually protecting the account. */
+async function enrolTotp() {
+  const user = await currentUser();
+  for (const f of (user.factors || []).filter((f) => f.status === "unverified")) {
+    await authCall(`factors/${f.id}`, undefined, "DELETE");
+  }
+
+  const r = await authCall("factors", { factor_type: "totp", friendly_name: "Affiliate admin" });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.error_description || body.msg || "Could not start enrolment");
+
+  // GoTrue has returned the QR as both a data URI and as raw SVG markup across versions.
+  // Normalise to a data URI so it stays an <img> either way — assigning remote markup
+  // through innerHTML is a habit worth not having, and `img-src 'self' data:` in
+  // vercel.json already allows exactly this.
+  const qr = String(body.totp?.qr_code || "");
+  return {
+    id: body.id,
+    secret: body.totp?.secret || "",
+    qr: qr.startsWith("data:") ? qr : "data:image/svg+xml;utf8," + encodeURIComponent(qr),
+  };
 }
 
 /** Access tokens last an hour and this is a screen people leave open. One silent
@@ -481,10 +568,62 @@ async function showDashboard() {
   $("dashView").hidden = false;
   $("signOut").hidden = false;
   $("whoami").textContent = `Signed in as ${me.email ?? "admin"}.`;
+  // Nagged, not blocked. Refusing to render the console until MFA is on would lock the
+  // only admin out of the screen they need in order to turn it on.
+  await refreshMfaPanel();
   const now = new Date();
   $("period").value = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
   await Promise.all([loadSignups(), loadAffiliates(), loadPayouts()]);
 }
+
+/** Show the enrolment panel only while this account has no verified factor. */
+async function refreshMfaPanel() {
+  let enrolled = false;
+  try {
+    const user = await currentUser();
+    enrolled = (user.factors || []).some((f) => f.status === "verified");
+  } catch {
+    // Never let a failed read of the factor list keep the console off the screen.
+    return;
+  }
+  $("mfaPanel").hidden = enrolled;
+}
+
+$("mfaStartBtn").onclick = async () => {
+  $("mfaStartBtn").disabled = true;
+  note("mfaMsg", "");
+  try {
+    const { id, secret, qr } = await enrolTotp();
+    $("mfaQr").src = qr;
+    $("mfaSecret").textContent = secret;
+    $("mfaSetup").hidden = false;
+    $("mfaStartBtn").hidden = true;
+    $("mfaForm").dataset.factorId = id;
+    $("mfaCode").focus();
+  } catch (err) {
+    note("mfaMsg", err.message, "error");
+    $("mfaStartBtn").disabled = false;
+  }
+};
+
+$("mfaForm").onsubmit = async (e) => {
+  e.preventDefault();
+  $("mfaVerifyBtn").disabled = true;
+  note("mfaMsg", "");
+  try {
+    // The same challenge/verify pair sign-in uses. Verifying an unverified factor is
+    // what marks it verified, and it returns an aal2 token — so this session is stepped
+    // up in place and the rest of the console keeps working without a re-login.
+    await verifyFactor($("mfaForm").dataset.factorId, $("mfaCode").value.trim());
+    $("mfaSetup").hidden = true;
+    $("mfaPanel").hidden = true;
+    note("msg", "Two-factor authentication is on. Signing in will ask for a code from now on.", "ok");
+  } catch (err) {
+    note("mfaMsg", err.message, "error");
+    $("mfaVerifyBtn").disabled = false;
+    $("mfaCode").select();
+  }
+};
 
 $("loginForm").onsubmit = async (e) => {
   e.preventDefault();
