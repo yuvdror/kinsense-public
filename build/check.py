@@ -28,6 +28,7 @@ class Doc(HTMLParser):
         self.stack, self.unbalanced = [], []
         self.ids, self.links, self.hreflangs = set(), [], []
         self.lang = self.dir = None
+        self.robots = ""
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -35,6 +36,8 @@ class Doc(HTMLParser):
             self.ids.add(a["id"])
         if tag == "html":
             self.lang, self.dir = a.get("lang"), a.get("dir")
+        if tag == "meta" and a.get("name") == "robots":
+            self.robots = a.get("content", "")
         if tag == "a" and "href" in a:
             self.links.append(a["href"])
         if tag == "link":
@@ -127,7 +130,10 @@ def main() -> int:
 
         for href in d.links:
             if href.startswith("#"):
-                if href[1:] not in d.ids:
+                # A bare "#" names nothing — it is the idiom for a link that
+                # JavaScript drives (admin.html's sign-out control). Only a named
+                # fragment has a target that can go missing.
+                if href != "#" and href[1:] not in d.ids:
                     errors.append(f"{rp}: broken anchor {href}")
                 continue
             target = resolve(href, rw)
@@ -173,14 +179,19 @@ def main() -> int:
 
             # Every page that should be indexed must be in the sitemap. Structural
             # rather than a count, so adding a page type can't silently pass.
+            # A page that asks not to be indexed has no business in the sitemap —
+            # the two would contradict each other. join.html is one case (a landing
+            # page per invite code, useful to whoever was sent it and nobody else)
+            # and admin.html is the other.
+            #
+            # Read off the parsed meta rather than matched as a literal string: admin
+            # declares "noindex, nofollow", which no substring test for the exact
+            # `content="noindex"` would ever match, so the console was being demanded
+            # in the sitemap it explicitly opts out of.
             indexable = {
                 p for p in pages
                 if p.name != "auth-callback.html"  # Disallowed in robots.txt
-                # A page that asks not to be indexed has no business in the sitemap —
-                # the two would contradict each other. join.html is the case: one
-                # landing page per invite code, useful to whoever was sent it and to
-                # nobody else.
-                and 'name="robots" content="noindex"' not in p.read_text(encoding="utf-8")
+                and "noindex" not in docs[p].robots
             }
             for missing in sorted(indexable - listed):
                 errors.append(f"sitemap.xml is missing {missing.relative_to(ROOT)}")

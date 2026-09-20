@@ -86,9 +86,31 @@ PILLAR_ICONS = [
 ]
 
 
+# The live App Store listing. A constant because the hero CTA on all eleven pages
+# points at it, and because the previous placeholder ("#pricing", with a TODO beside
+# it) survived three rounds of edits without anyone noticing the button went nowhere.
+#
+# iOS only, on purpose: there is no public Play listing yet, so no Play button and —
+# just as importantly — no locale may claim Android in the note under the CTA.
+APP_STORE_URL = "https://apps.apple.com/app/id6798410492"
+
+# Search-intent landing pages. Hand-written English HTML at the repo root, because
+# they have nothing to keep in step across locales — the reason the rest of this file
+# exists. Named here so the sitemap and the in-page links share one spelling.
+LANDING_LIFE360 = "life360-alternative"
+LANDING_FREE = "free-family-location-sharing"
+LANDING_PAGES = [LANDING_LIFE360, LANDING_FREE]
+
+
 def e(text: str) -> str:
     """Escape for HTML text content."""
     return html.escape(text, quote=False)
+
+
+def linked(text: str, href: str, label: str) -> str:
+    """Escaped `text` with its {link} placeholder swapped for an anchor. Keeps the
+    copy in content.py readable as a sentence instead of splitting it around markup."""
+    return e(text).replace("{link}", f'<a href="{href}">{e(label)}</a>')
 
 
 # No trailing slash on locale paths. vercel.json sets trailingSlash: false, so the
@@ -144,6 +166,54 @@ def hreflangs(current: str) -> str:
     return "\n".join(lines)
 
 
+def render_compare(loc: dict) -> str:
+    """The Life360 comparison table.
+
+    Its own function because it is the one section with real internal structure — a
+    scroll container, a table, and per-cell classes that carry meaning — and inlining
+    all of that in the page template buried the surrounding copy.
+
+    The header row is not translated: the first cell is a spacer and the other two are
+    brand names, which read the same in every locale.
+    """
+    cells = []
+    for label, ours, theirs, their_class in loc["compare_rows"]:
+        attr = f' class="{their_class}"' if their_class else ""
+        cells.append(
+            f'          <tr>\n'
+            f'            <td>{e(label)}</td>\n'
+            f'            <td class="yes">{e(ours)}</td>\n'
+            f'            <td{attr}>{e(theirs)}</td>\n'
+            f'          </tr>'
+        )
+    rows = "\n".join(cells)
+
+    # Only English has a long-form comparison to link to — the landing pages are not
+    # translated — so every other locale ends on the note.
+    more = ""
+    if loc.get("compare_more"):
+        anchor = linked(loc["compare_more"], f"/{LANDING_LIFE360}", loc["compare_more_link"])
+        more = f'\n    <p class="sub">{anchor}</p>'
+
+    return f'''<section id="compare" class="reveal">
+  <div class="wrap">
+    <h2>{e(loc["compare_h2"])}</h2>
+    <p class="sub">{e(loc["compare_sub"])}</p>
+    <div class="compare-scroll">
+      <table class="compare">
+        <thead>
+          <tr><th>&nbsp;</th><th>TribeSentry</th><th>Life360</th></tr>
+        </thead>
+        <tbody>
+{rows}
+        </tbody>
+      </table>
+    </div>{more}
+    <p class="compare-note">{e(loc["compare_note"])}</p>
+  </div>
+</section>'''
+
+
 def render(loc: dict) -> str:
     code = loc["code"]
     privacy_href = "/privacy"
@@ -172,6 +242,10 @@ def render(loc: dict) -> str:
         "{link}", f'<a href="{privacy_href}">{e(loc["privacy_link"])}</a>'
     )
 
+    # Only English links out of the pricing note, for the same reason as compare_more.
+    plus_note = (linked(loc["plus_note"], f"/{LANDING_FREE}", loc["plus_note_link"])
+                 if loc.get("plus_note_link") else e(loc["plus_note"]))
+
     free_items = "\n".join(f"          <li>{e(i)}</li>" for i in loc["free_items"])
     plus_items = "\n".join(f"          <li>{e(i)}</li>" for i in loc["plus_items"])
 
@@ -181,7 +255,7 @@ def render(loc: dict) -> str:
 {BANNER}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{e(loc["title"])}</title>
+<title>{e(loc["seo_title"])}</title>
 <meta name="description" content="{html.escape(loc["desc"])}">
 <meta property="og:title" content="{html.escape(loc["title"])}">
 <meta property="og:description" content="{html.escape(loc["desc"])}">
@@ -201,7 +275,8 @@ def render(loc: dict) -> str:
     <nav>
       <a href="#features">{e(loc["nav"][0])}</a>
       <a href="#privacy">{e(loc["nav"][1])}</a>
-      <a href="#pricing">{e(loc["nav"][2])}</a>
+      <a href="#compare">{e(loc["nav"][2])}</a>
+      <a href="#pricing">{e(loc["nav"][3])}</a>
 {lang_menu(code, loc)}
     </nav>
   </div>
@@ -212,8 +287,9 @@ def render(loc: dict) -> str:
     <h1>{e(loc["hero_h1"])}</h1>
     <p class="lede">{e(loc["hero_lede"])}</p>
     <div class="cta">
-      <!-- TODO: replace with the real Play listing URL once the app is live. -->
-      <a class="btn btn-primary" href="#pricing">{e(loc["cta1"])}</a>
+      <!-- iOS only for now. Add the Play listing beside this one when Android ships;
+           until then the note below must not claim Android. -->
+      <a class="btn btn-primary" href="{APP_STORE_URL}">{e(loc["cta1"])}</a>
       <a class="btn btn-secondary" href="#privacy">{e(loc["cta2"])}</a>
     </div>
     <p class="note">{e(loc["note"])}</p>
@@ -258,6 +334,8 @@ def render(loc: dict) -> str:
   </div>
 </section>
 
+{render_compare(loc)}
+
 <section id="pricing" class="reveal">
   <div class="wrap">
     <h2>{e(loc["pricing_h2"])}</h2>
@@ -276,7 +354,7 @@ def render(loc: dict) -> str:
         <ul>
 {plus_items}
         </ul>
-        <p class="plan-note">{e(loc["plus_note"])}</p>
+        <p class="plan-note">{plus_note}</p>
       </div>
     </div>
   </div>
@@ -434,6 +512,11 @@ def sitemap() -> str:
     # URL, and support copy nobody has reviewed in ten languages would be worse than
     # none at all. Add locales here if that ever changes.
     entries.append(f'  <url>\n    <loc>{SITE}/support</loc>\n  </url>')
+    # Hand-written English landing pages at the root, routed extensionless by
+    # vercel.json exactly like /privacy and /support. They are not rendered here —
+    # this generator only has to know they exist so the sitemap stays complete.
+    for slug in LANDING_PAGES:
+        entries.append(f'  <url>\n    <loc>{SITE}/{slug}</loc>\n  </url>')
     for loc in LOCALES:
         entries.append(f'  <url>\n    <loc>{deletion_url(loc["code"])}</loc>\n  </url>')
     body = "\n".join(entries)
@@ -452,6 +535,10 @@ Allow: /
 # The password-reset landing page. Nothing to index, and it should never surface
 # in a search result where someone might mistake it for a sign-in page.
 Disallow: /auth-callback.html
+
+# The affiliate admin console. Nothing here is public.
+Disallow: /admin
+Disallow: /admin.html
 
 Sitemap: {SITE}/sitemap.xml
 '''

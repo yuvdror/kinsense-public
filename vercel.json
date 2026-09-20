@@ -24,6 +24,14 @@
       "destination": "/support.html"
     },
     {
+      "source": "/life360-alternative",
+      "destination": "/life360-alternative.html"
+    },
+    {
+      "source": "/free-family-location-sharing",
+      "destination": "/free-family-location-sharing.html"
+    },
+    {
       "source": "/delete-account",
       "destination": "/delete-account.html"
     },
