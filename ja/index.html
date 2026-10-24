@@ -68,12 +68,16 @@
     <h1>ちゃんと着いたと分かる。圏外でも。</h1>
     <p class="lede">家族のためのリアルタイム位置情報、SOS、事故検知。地図を先にダウンロードしておけば、電波が切れた先でも動き続けます。通学路のトンネルでも、キャンプ場でも、ローミングを切った海外でも。</p>
     <div class="cta">
-      <!-- iOS only for now. Add the Play listing beside this one when Android ships;
-           until then the note below must not claim Android. -->
-      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492">TribeSentryを入手</a>
+      <!-- Two store buttons, both primary: favouring one platform is exactly the bug
+           this replaced. The visible labels are the store names, which are brand names
+           and are not translated — same rule as the compare table's column heads. The
+           translated call to action survives as the accessible name, so a screen reader
+           still hears "Get TribeSentry", not a bare "App Store". -->
+      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492" aria-label="TribeSentryを入手 — App Store">App Store</a>
+      <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=cloud.tribesentry.app" aria-label="TribeSentryを入手 — Google Play">Google Play</a>
       <a class="btn btn-secondary" href="#privacy">データの扱いについて</a>
     </div>
-    <p class="note">iPhone · 11言語 · SOSと事故検知は無料</p>
+    <p class="note">AndroidとiPhone · 11言語 · SOSと事故検知は無料</p>
   </div>
 
   <!-- Real App Store screenshots in CSS-drawn device frames. Shipped at 2x of

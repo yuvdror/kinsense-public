@@ -86,13 +86,17 @@ PILLAR_ICONS = [
 ]
 
 
-# The live App Store listing. A constant because the hero CTA on all eleven pages
-# points at it, and because the previous placeholder ("#pricing", with a TODO beside
-# it) survived three rounds of edits without anyone noticing the button went nowhere.
+# The live store listings. Constants because the hero CTA on all eleven pages points at
+# them, and because the original placeholder ("#pricing", with a TODO beside it) survived
+# three rounds of edits without anyone noticing the button went nowhere.
 #
-# iOS only, on purpose: there is no public Play listing yet, so no Play button and —
-# just as importantly — no locale may claim Android in the note under the CTA.
+# Both platforms are public. Android shipped to Play production without this page ever
+# being told: for a stretch the note claimed iPhone only and there was no Play button at
+# all, so every Android visitor landed on a page with no way to install the app they had
+# come for. If one store is ever ahead of the other again, change the note in content.py
+# in the same commit as the button — the two must not drift.
 APP_STORE_URL = "https://apps.apple.com/app/id6798410492"
+PLAY_URL = "https://play.google.com/store/apps/details?id=cloud.tribesentry.app"
 
 # Search-intent landing pages. Hand-written English HTML at the repo root, because
 # they have nothing to keep in step across locales — the reason the rest of this file
@@ -287,9 +291,13 @@ def render(loc: dict) -> str:
     <h1>{e(loc["hero_h1"])}</h1>
     <p class="lede">{e(loc["hero_lede"])}</p>
     <div class="cta">
-      <!-- iOS only for now. Add the Play listing beside this one when Android ships;
-           until then the note below must not claim Android. -->
-      <a class="btn btn-primary" href="{APP_STORE_URL}">{e(loc["cta1"])}</a>
+      <!-- Two store buttons, both primary: favouring one platform is exactly the bug
+           this replaced. The visible labels are the store names, which are brand names
+           and are not translated — same rule as the compare table's column heads. The
+           translated call to action survives as the accessible name, so a screen reader
+           still hears "Get TribeSentry", not a bare "App Store". -->
+      <a class="btn btn-primary" href="{APP_STORE_URL}" aria-label="{e(loc["cta1"])} — App Store">App Store</a>
+      <a class="btn btn-primary" href="{PLAY_URL}" aria-label="{e(loc["cta1"])} — Google Play">Google Play</a>
       <a class="btn btn-secondary" href="#privacy">{e(loc["cta2"])}</a>
     </div>
     <p class="note">{e(loc["note"])}</p>

@@ -68,12 +68,16 @@
     <h1>Wissen, dass sie angekommen sind. Auch ohne Empfang.</h1>
     <p class="lede">Live-Standort, SOS und Unfallerkennung für die Familie. Lade die Karten vorher herunter, dann läuft es weiter, wo der Empfang aufhört — im Tunnel auf dem Schulweg, auf dem Campingplatz, im Ausland ohne Roaming.</p>
     <div class="cta">
-      <!-- iOS only for now. Add the Play listing beside this one when Android ships;
-           until then the note below must not claim Android. -->
-      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492">TribeSentry holen</a>
+      <!-- Two store buttons, both primary: favouring one platform is exactly the bug
+           this replaced. The visible labels are the store names, which are brand names
+           and are not translated — same rule as the compare table's column heads. The
+           translated call to action survives as the accessible name, so a screen reader
+           still hears "Get TribeSentry", not a bare "App Store". -->
+      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492" aria-label="TribeSentry holen — App Store">App Store</a>
+      <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=cloud.tribesentry.app" aria-label="TribeSentry holen — Google Play">Google Play</a>
       <a class="btn btn-secondary" href="#privacy">Wie wir mit deinen Daten umgehen</a>
     </div>
-    <p class="note">iPhone · 11 Sprachen · SOS und Unfallerkennung sind kostenlos</p>
+    <p class="note">Android und iPhone · 11 Sprachen · SOS und Unfallerkennung sind kostenlos</p>
   </div>
 
   <!-- Real App Store screenshots in CSS-drawn device frames. Shipped at 2x of

@@ -39,7 +39,7 @@ LOCALES = [
         "hero_h1": "Know they got there. Even with no signal.",
         "hero_lede": "Live location, SOS and crash detection for your family. Download the maps first and it keeps working where the signal drops — the tunnel on the school run, the campsite, the trip abroad with roaming off.",
         "cta1": "Get TribeSentry", "cta2": "How we treat your data",
-        "note": "iPhone · 11 languages · SOS and crash detection are free",
+        "note": "Android and iPhone · 11 languages · SOS and crash detection are free",
         "shots_label": "The TribeSentry app: a live family map, route playback and saved territories",
         "pillars": [
             ("🗺️", "Works offline", "Download your maps ahead of time and TribeSentry keeps going with no reception at all — underground, out at the campsite, or abroad with roaming off."),
@@ -104,7 +104,7 @@ LOCALES = [
         "hero_h1": "Wissen, dass sie angekommen sind. Auch ohne Empfang.",
         "hero_lede": "Live-Standort, SOS und Unfallerkennung für die Familie. Lade die Karten vorher herunter, dann läuft es weiter, wo der Empfang aufhört — im Tunnel auf dem Schulweg, auf dem Campingplatz, im Ausland ohne Roaming.",
         "cta1": "TribeSentry holen", "cta2": "Wie wir mit deinen Daten umgehen",
-        "note": "iPhone · 11 Sprachen · SOS und Unfallerkennung sind kostenlos",
+        "note": "Android und iPhone · 11 Sprachen · SOS und Unfallerkennung sind kostenlos",
         "shots_label": "Die TribeSentry-App: Live-Familienkarte, Streckenwiedergabe und gespeicherte Gebiete",
         "pillars": [
             ("🗺️", "Funktioniert offline", "Lade deine Karten vorher herunter, dann arbeitet TribeSentry ganz ohne Empfang weiter — unter der Erde, auf dem Campingplatz, im Ausland ohne Roaming."),
@@ -166,7 +166,7 @@ LOCALES = [
         "hero_h1": "Saber que han llegado. Incluso sin cobertura.",
         "hero_lede": "Ubicación en vivo, SOS y detección de accidentes para tu familia. Descarga los mapas antes de salir y sigue funcionando donde se acaba la señal: el túnel de camino al colegio, el camping, el viaje al extranjero con la itinerancia apagada.",
         "cta1": "Consigue TribeSentry", "cta2": "Cómo tratamos tus datos",
-        "note": "iPhone · 11 idiomas · El SOS y la detección de accidentes son gratis",
+        "note": "Android y iPhone · 11 idiomas · El SOS y la detección de accidentes son gratis",
         "shots_label": "La app TribeSentry: mapa familiar en vivo, reproducción de rutas y territorios guardados",
         "pillars": [
             ("🗺️", "Funciona sin conexión", "Descarga los mapas con antelación y TribeSentry sigue funcionando sin nada de cobertura: bajo tierra, en el camping o en el extranjero con la itinerancia apagada."),
@@ -228,7 +228,7 @@ LOCALES = [
         "hero_h1": "Savoir qu'ils sont bien arrivés. Même sans réseau.",
         "hero_lede": "Position en direct, SOS et détection d'accident pour votre famille. Téléchargez les cartes à l'avance et ça continue de marcher là où le réseau s'arrête : le tunnel sur le trajet de l'école, le camping, le voyage à l'étranger avec l'itinérance coupée.",
         "cta1": "Obtenir TribeSentry", "cta2": "Ce que nous faisons de vos données",
-        "note": "iPhone · 11 langues · Le SOS et la détection d'accident sont gratuits",
+        "note": "Android et iPhone · 11 langues · Le SOS et la détection d'accident sont gratuits",
         "shots_label": "L'application TribeSentry : carte familiale en direct, relecture des trajets et territoires enregistrés",
         "pillars": [
             ("🗺️", "Marche hors ligne", "Téléchargez vos cartes à l'avance et TribeSentry continue sans aucun réseau : sous terre, au camping, à l'étranger avec l'itinérance coupée."),
@@ -290,7 +290,7 @@ LOCALES = [
         "hero_h1": "Saber que chegaram. Mesmo sem sinal.",
         "hero_lede": "Localização ao vivo, SOS e detecção de acidente para a sua família. Baixe os mapas antes de sair e continua funcionando onde o sinal acaba — o túnel no caminho da escola, o acampamento, a viagem ao exterior com o roaming desligado.",
         "cta1": "Baixar o TribeSentry", "cta2": "O que fazemos com seus dados",
-        "note": "iPhone · 11 idiomas · SOS e detecção de acidente são grátis",
+        "note": "Android e iPhone · 11 idiomas · SOS e detecção de acidente são grátis",
         "shots_label": "O app TribeSentry: mapa da família ao vivo, reprodução de trajetos e territórios salvos",
         "pillars": [
             ("🗺️", "Funciona offline", "Baixe os mapas com antecedência e o TribeSentry continua sem nenhum sinal: no subsolo, no acampamento, no exterior com o roaming desligado."),
@@ -352,7 +352,7 @@ LOCALES = [
         "hero_h1": "Знать, что они дошли. Даже без связи.",
         "hero_lede": "Геолокация, SOS и определение аварии для семьи. Скачайте карты заранее, и всё продолжит работать там, где связь заканчивается: туннель по дороге в школу, кемпинг, поездка за границу с выключенным роумингом.",
         "cta1": "Установить TribeSentry", "cta2": "Что мы делаем с вашими данными",
-        "note": "iPhone · 11 языков · SOS и определение аварии бесплатны",
+        "note": "Android и iPhone · 11 языков · SOS и определение аварии бесплатны",
         "shots_label": "Приложение TribeSentry: живая карта семьи, воспроизведение маршрутов и сохранённые территории",
         "pillars": [
             ("🗺️", "Работает офлайн", "Скачайте карты заранее, и TribeSentry продолжит работать вообще без связи — под землёй, в кемпинге, за границей с выключенным роумингом."),
@@ -414,7 +414,7 @@ LOCALES = [
         "hero_h1": "पता रहे कि वे पहुँच गए। नेटवर्क न हो तब भी।",
         "hero_lede": "परिवार के लिए लाइव लोकेशन, SOS और दुर्घटना की पहचान। निकलने से पहले नक्शे डाउनलोड कर लीजिए, फिर जहाँ नेटवर्क खत्म होता है वहाँ भी काम चलता रहेगा — स्कूल के रास्ते की सुरंग में, कैंप पर, विदेश में रोमिंग बंद रखते हुए।",
         "cta1": "TribeSentry पाइए", "cta2": "आपके डेटा के साथ हम क्या करते हैं",
-        "note": "iPhone · 11 भाषाएँ · SOS और दुर्घटना पहचान मुफ़्त",
+        "note": "Android और iPhone · 11 भाषाएँ · SOS और दुर्घटना पहचान मुफ़्त",
         "shots_label": "TribeSentry ऐप: लाइव परिवार मैप, रूट प्लेबैक और सहेजे गए क्षेत्र",
         "pillars": [
             ("🗺️", "बिना नेटवर्क भी चलता है", "नक्शे पहले से डाउनलोड कर लीजिए और TribeSentry बिना किसी नेटवर्क के चलता रहेगा — ज़मीन के नीचे, कैंप पर, विदेश में रोमिंग बंद रखते हुए।"),
@@ -476,7 +476,7 @@ LOCALES = [
         "hero_h1": "أن تعرف أنهم وصلوا. حتى دون تغطية.",
         "hero_lede": "موقع مباشر واستغاثة وكشف حوادث لعائلتك. نزّل الخرائط قبل أن تنطلق، ويستمر العمل حيث تنتهي التغطية — في النفق على طريق المدرسة، وفي المخيم، وفي الخارج مع إيقاف التجوال.",
         "cta1": "احصل على TribeSentry", "cta2": "كيف نتعامل مع بياناتك",
-        "note": "آيفون · 11 لغة · الاستغاثة وكشف الحوادث مجانًا",
+        "note": "أندرويد وآيفون · 11 لغة · الاستغاثة وكشف الحوادث مجانًا",
         "shots_label": "تطبيق TribeSentry: خريطة حية للعائلة وإعادة عرض المسار والمناطق المحفوظة",
         "pillars": [
             ("🗺️", "يعمل دون إنترنت", "نزّل خرائطك مسبقًا ويستمر TribeSentry بلا أي تغطية — تحت الأرض، وفي المخيم، وفي الخارج مع إيقاف التجوال."),
@@ -538,7 +538,7 @@ LOCALES = [
         "hero_h1": "לדעת שהם הגיעו. גם בלי קליטה.",
         "hero_lede": "מיקום חי, מצוקה וזיהוי תאונה למשפחה. הורידו את המפות מראש, וזה ממשיך לעבוד איפה שהקליטה נגמרת — במנהרה בדרך לבית הספר, בקמפינג, ובחו״ל עם נדידה כבויה.",
         "cta1": "להוריד את TribeSentry", "cta2": "מה אנחנו עושים עם המידע שלך",
-        "note": "אייפון · 11 שפות · מצוקה וזיהוי תאונה בחינם",
+        "note": "אנדרואיד ואייפון · 11 שפות · מצוקה וזיהוי תאונה בחינם",
         "shots_label": "אפליקציית TribeSentry: מפת משפחה חיה, הרצת מסלול וטריטוריות שמורות",
         "pillars": [
             ("🗺️", "עובד בלי קליטה", "הורידו את המפות מראש ו‑TribeSentry ימשיך לעבוד בלי קליטה בכלל — מתחת לאדמה, בקמפינג, בחו״ל עם נדידה כבויה."),
@@ -600,7 +600,7 @@ LOCALES = [
         "hero_h1": "ちゃんと着いたと分かる。圏外でも。",
         "hero_lede": "家族のためのリアルタイム位置情報、SOS、事故検知。地図を先にダウンロードしておけば、電波が切れた先でも動き続けます。通学路のトンネルでも、キャンプ場でも、ローミングを切った海外でも。",
         "cta1": "TribeSentryを入手", "cta2": "データの扱いについて",
-        "note": "iPhone · 11言語 · SOSと事故検知は無料",
+        "note": "AndroidとiPhone · 11言語 · SOSと事故検知は無料",
         "shots_label": "TribeSentryアプリ：家族のライブマップ、経路の再生、保存したテリトリー",
         "pillars": [
             ("🗺️", "オフラインで動きます", "地図を先にダウンロードしておけば、TribeSentryは電波が一切なくても動き続けます。地下でも、キャンプ場でも、ローミングを切った海外でも。"),
@@ -662,7 +662,7 @@ LOCALES = [
         "hero_h1": "知道他们平安到了。没信号也一样。",
         "hero_lede": "为家人提供实时位置、求救和碰撞检测。出发前把地图下载好，信号断了的地方它照样能用——上学路上的隧道、露营地、关掉漫游的国外。",
         "cta1": "获取 TribeSentry", "cta2": "我们如何处理你的数据",
-        "note": "iPhone · 11 种语言 · 求救与碰撞检测免费",
+        "note": "Android 和 iPhone · 11 种语言 · 求救与碰撞检测免费",
         "shots_label": "TribeSentry 应用：实时家人地图、路线回放和已保存的领地",
         "pillars": [
             ("🗺️", "离线可用", "提前下载地图，TribeSentry 在完全没有信号的情况下依然工作——地下、露营地，或者关掉漫游的国外。"),

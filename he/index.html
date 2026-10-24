@@ -68,12 +68,16 @@
     <h1>לדעת שהם הגיעו. גם בלי קליטה.</h1>
     <p class="lede">מיקום חי, מצוקה וזיהוי תאונה למשפחה. הורידו את המפות מראש, וזה ממשיך לעבוד איפה שהקליטה נגמרת — במנהרה בדרך לבית הספר, בקמפינג, ובחו״ל עם נדידה כבויה.</p>
     <div class="cta">
-      <!-- iOS only for now. Add the Play listing beside this one when Android ships;
-           until then the note below must not claim Android. -->
-      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492">להוריד את TribeSentry</a>
+      <!-- Two store buttons, both primary: favouring one platform is exactly the bug
+           this replaced. The visible labels are the store names, which are brand names
+           and are not translated — same rule as the compare table's column heads. The
+           translated call to action survives as the accessible name, so a screen reader
+           still hears "Get TribeSentry", not a bare "App Store". -->
+      <a class="btn btn-primary" href="https://apps.apple.com/app/id6798410492" aria-label="להוריד את TribeSentry — App Store">App Store</a>
+      <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=cloud.tribesentry.app" aria-label="להוריד את TribeSentry — Google Play">Google Play</a>
       <a class="btn btn-secondary" href="#privacy">מה אנחנו עושים עם המידע שלך</a>
     </div>
-    <p class="note">אייפון · 11 שפות · מצוקה וזיהוי תאונה בחינם</p>
+    <p class="note">אנדרואיד ואייפון · 11 שפות · מצוקה וזיהוי תאונה בחינם</p>
   </div>
 
   <!-- Real App Store screenshots in CSS-drawn device frames. Shipped at 2x of
