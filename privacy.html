@@ -132,6 +132,8 @@
         <li><strong>RevenueCat</strong> &mdash; processes subscription purchases and tells the App whether your subscription is active. It receives your account identifier and the purchase receipt from Apple or Google; it does not receive your location.</li>
       </ul>
     </li>
+        <li><strong>IONOS</strong> (Germany) &mdash; the mail server that sends sign-up confirmations and password resets. It therefore handles your email address.</li>
+        <li><strong>OpenFreeMap</strong> (OpenStreetMap data) and <strong>Esri ArcGIS World Imagery</strong> &mdash; map and satellite tiles. Your device requests tiles for the area it is showing, so these providers see the requests their tiles are fetched for. No account data is sent with them.</li>
     <li><strong>Legal / safety</strong> &mdash; if required by law, or to protect the rights, safety, and property of users or the public.</li>
     <li>We do <strong>not sell</strong> your personal data.</li>
   </ul>
@@ -160,14 +162,31 @@
   </ul>
   <p>EEA/UK users may lodge a complaint with their data protection authority. To exercise any right, contact <a href="mailto:info@tribesentry.cloud">info@tribesentry.cloud</a>.</p>
 
+  <h2>7a. Our lawful basis for each use</h2>
+  <p>Required by GDPR Article&nbsp;13, and previously not stated anywhere.</p>
+  <ul>
+    <li><strong>Sharing your position with your tribe</strong> &mdash; contract. It is the service you asked for, and it stops when you stop sharing.</li>
+    <li><strong>SOS, crash, arrival and low-battery alerts</strong> &mdash; contract, and vital interests for an SOS, which is the one case where someone&rsquo;s safety is the point.</li>
+    <li><strong>Seven days of history</strong> &mdash; contract for the feature; the seven-day limit is the safeguard.</li>
+    <li><strong>Crash and error diagnostics</strong> &mdash; legitimate interests. An app that silently breaks protects nobody.</li>
+    <li><strong>Product analytics</strong> &mdash; consent. Off until you give it, withdrawable in Profile.</li>
+    <li><strong>Advertising</strong> &mdash; consent where required, collected through Google&rsquo;s consent form before any ad loads.</li>
+    <li><strong>A child&rsquo;s data, where the child is below the age of digital consent</strong> &mdash; consent given by the tribe owner as parent or guardian. See section&nbsp;9.</li>
+  </ul>
+
   <h2>8. Security</h2>
   <p>We use encryption in transit (HTTPS/TLS) and access controls (row-level security) to protect your data. No method of transmission or storage is 100% secure, but we work to protect your information.</p>
 
-  <h2>9. Children&rsquo;s privacy</h2>
-  <p>TribeSentry is not directed to children under 13. We do not knowingly collect personal data from children under that age without verifiable parental consent. If you believe a child has provided us data, contact <a href="mailto:info@tribesentry.cloud">info@tribesentry.cloud</a> and we will delete it.</p>
+  <h2>9. Children</h2>
+  <p>TribeSentry is a family locator, so we expect children to be in it. Saying otherwise would be untrue, and this section used to.</p>
+  <p>A child does not sign themselves up to anything in isolation: an account is created with an email address, and a member only becomes part of a tribe when that tribe&rsquo;s owner approves them. We treat the adult who owns the tribe as the parent or guardian giving consent on the child&rsquo;s behalf, which is what GDPR Article&nbsp;8 expects for a user below the age of digital consent &mdash; 16 in the EU, or as low as 13 where a member state has set it lower.</p>
+  <p>What we hold about a child is what we hold about any member: their display name and avatar, their current position, and up to seven days of location history, which is then deleted automatically. The same rights apply, exercised by the parent or guardian: the account can be deleted from inside the app, and deletion takes the location, the history and the tribe membership with it.</p>
+  <p>Ads are configured for this. The ad content rating is restricted to &ldquo;G&rdquo;, and requests are tagged as potentially coming from a user below the age of consent, which means ads are non-personalised.</p>
+  <p>If you believe a child&rsquo;s data is here without a parent or guardian having agreed to it, contact <a href="mailto:info@tribesentry.cloud">info@tribesentry.cloud</a> and we will delete it.</p>
 
-  <h2>10. International data transfers</h2>
-  <p>Your data may be processed in countries other than where you live (including the United States, where our providers operate). We rely on appropriate safeguards for such transfers where required.</p>
+  <h2>10. Where your data is, and international transfers</h2>
+  <p>Concretely, rather than &ldquo;may be processed elsewhere&rdquo;: the database and API holding your tribe, your positions and your history run on <strong>Supabase in AWS us-east-1, in the United States</strong>. Analytics, where you have consented to it, goes to <strong>PostHog&rsquo;s EU cloud</strong>. Email is sent through <strong>IONOS in Germany</strong>.</p>
+  <p>So if you are in the EU or the UK, your personal data is transferred to the United States. That transfer relies on our data processing agreement with Supabase and the safeguards it incorporates. We are established in Israel, which the European Commission recognises as providing an adequate level of protection.</p>
 
   <h2>11. Changes to this policy</h2>
   <p>We may update this policy; we will post the new version here and update the effective date. Material changes will be communicated in the App where appropriate.</p>
